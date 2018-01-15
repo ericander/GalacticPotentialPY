@@ -97,7 +97,7 @@ def unbound(particles, r, v, ret = '', rs = '', datadir = './data'):
     return (unbound == 1), n
 
 def MGC1_like(particles,
-        rs = np.zeros(0), r = np.zeros(0), v = np.zeros(0),
+        rs = '', r = '', v = '',
         datadir = './data/'):
     """Computes the fraction of MGC1-like clusters in an encounter.
 
@@ -122,13 +122,13 @@ def MGC1_like(particles,
     npar = len(particles)
 
     # Load data unless provided
-    if r.size == 0 or v.size == 0:
+    if type(r) == type('') or type(v) == type(''):
         (_, x, y, z, vx, vy, vz) = read.particle(particles, datadir)
         r = np.zeros(x.shape)
         v = np.zeros(x.shape)
         r[:] = np.sqrt(x[:]**2 + y[:]**2 + z[:]**2)
         v[:] = np.sqrt(vx[:]**2 + vy[:]**2 + vz[:]**2)
-    if rs.size == 0:
+    if type(rs) == type(''):
         (_, xs, ys, zs, vx, vy, vz, _) = read.satellite(datadir)
         rs = np.sqrt(xs**2 + ys**2 + zs**2)
 

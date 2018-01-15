@@ -26,9 +26,39 @@ def info(info, datadir = './../'):
         words = line.split()
         if not len(words) == 0:
             if words[0] == info:
-                return float(words[2])
+                try:
+                    return float(words[2])
+                except ValueError:
+                    return words[2]
 
     raise ValueError(info + " is not an available parameter.")
+
+def setup(param, datadir = './'):
+    """Reads the parameters set for the encounter. The script will
+    search for a file setup.txt
+
+    Positional Arguments:
+        param
+            List of paramters needed from setup.txt
+
+    Keyword Arguments:
+        datadir
+            Directory of setup.txt
+    """
+    # Eric Andersson, 2018-01-15
+
+    # Search for parameters.
+    for i in range(len(param)):
+        for line in open(datadir + 'setup.txt'):
+            words = line.split()
+            if not len(words) == 0:
+                if words[0] == param[i]:
+                    try:
+                        param[i] = float(words[2])
+                    except ValueError:
+                        param[i] = words[2]
+
+    return tuple(param)
 
 def particle(particles,
         datadir = './data/'):
@@ -108,3 +138,19 @@ def satellite(datadir = './data/'):
     vz = np.array(data.vz) * K
     col = np.array(data.col)
     return (t, x, y, z, vx, vy, vz, col)
+
+def GC_sample(datadir = './'):
+    """Reads the generated sample of clusters.
+
+    Keyword Arguments:
+        datadir
+            Directory of sample
+    """
+    # Eric Andersson, 2018-01-15
+    import numpy as np
+    import pandas as pd
+
+    # Read data.
+    sample = np.loadtxt(datadir + 'GC_sample.txt')
+
+    return sample

@@ -12,3 +12,5 @@ from . import read
 from . import compute
 from . import analyse
 from . import constants
+from . import generate
+from . import draw

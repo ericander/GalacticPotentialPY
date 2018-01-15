@@ -21,7 +21,7 @@ def gravitational_constant(unit = 'SI'):
     elif unit == 'kpc(km/s)^2Msun':
         return 4.300912722e-6
     elif unit == 'kpc(kpc/Myr)^2Msun':
-        raise NotImplementedError(unit + "is not implemented")
+        return 4.558e-13 * np.pi**2
     else:
         raise NotImplementedError(unit + "is not implemented")
 
