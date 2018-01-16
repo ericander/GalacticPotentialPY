@@ -122,13 +122,13 @@ def MGC1_like(particles,
     npar = len(particles)
 
     # Load data unless provided
-    if type(r) == type('') or type(v) == type(''):
+    if type(r) == str or type(v) == str:
         (_, x, y, z, vx, vy, vz) = read.particle(particles, datadir)
         r = np.zeros(x.shape)
         v = np.zeros(x.shape)
         r[:] = np.sqrt(x[:]**2 + y[:]**2 + z[:]**2)
         v[:] = np.sqrt(vx[:]**2 + vy[:]**2 + vz[:]**2)
-    if type(rs) == type(''):
+    if type(rs) == str:
         (_, xs, ys, zs, vx, vy, vz, _) = read.satellite(datadir)
         rs = np.sqrt(xs**2 + ys**2 + zs**2)
 
@@ -148,5 +148,28 @@ def MGC1_like(particles,
     # Unbound clusters.
     unb, nunb = unbound(particles, rl, vl, ret = ret, datadir = datadir)
 
-    # Determine which or remaining clusters are MGC1 like.
-    raise NotImplementedError("Function is not implemented yet.")
+    # Remove retained and unbound clusters.
+    M31GC = (ret == False) & (unb == False)
+    bound_particles = np.array(particles)[M31GC]
+
+    # Find index of first apocentre for M31 clusters.
+    raise NotImplementedError("This is not implemented yet.")
+    postenc = list(range(xpi, r[0].size))
+    fomaxi = np.zeros(npar)
+    for par in bound_particles:
+        for i in range(r[par][postenc].size-1):
+            if r[par][postenc][i] > r[par][postenc][i+1]:
+                fomaxi[par] = i
+                continue
+
+    # Find MGC1-like clusters
+    MGC1 = np.zeros([npar], dtype=bool)
+    n = 0
+    for par in bound_particles:
+        mask = list(range(int(fomaxi[par]), r[par].size))
+        if min(r[par][mask]) < 200:
+            if max(r[par][mask]) > 200:
+                MGC1[par] = True
+                n+=1
+
+    return MGC1, n

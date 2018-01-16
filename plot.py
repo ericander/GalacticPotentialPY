@@ -153,7 +153,7 @@ def separation(particles,
         rp[par] = np.sqrt(x[par]**2 + y[par]**2 + z[par]**2)
 
     # Count MGC1-like
-    MGC1, _, _ = analyse.MGC1_like()
+    (MGC1, _)= analyse.MGC1_like(particles)
 
     # Compute final distance.
     rpf = np.zeros(npar)
@@ -193,10 +193,17 @@ def separation(particles,
             label = r'${\rm Dwarf\ galaxy }$')
 
     # Globular clusters
-    ax1.plot(t[MGC1]/1000, rp[MGC1], 'g-', lw = 0.5, alpha = 1,
+    for par in particles:
+        if MGC1[par]:
+            ax1.plot(t/1000, rp[par], 'g-', lw = 0.5, alpha = 1)
+        else:
+            ax1.plot(t/1000, rp[par], '-',
+            color = 'grey', lw = 0.5, alpha = 1)
+
+    # Add labels
+    plt.plot([],[], 'g-', lw = 0.5, alpha = 1,
             label = r'${\rm MGC1-like}$')
-    ax1.plot(t[(MGC1 == False)]/1000, rp[(MGC1 == False)], '-',
-            color = 'grey', lw = 0.5, alpha = 1,
+    plt.plot([],[], '-', color = 'grey', lw = 0.5, alpha = 1,
             label = r'${\rm Cluster}$')
 
     # MGC1 orbital distance.
