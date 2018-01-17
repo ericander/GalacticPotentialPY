@@ -152,21 +152,21 @@ def MGC1_like(particles,
     M31GC = (ret == False) & (unb == False)
     bound_particles = np.array(particles)[M31GC]
 
-    # Find index of first apocentre for M31 clusters.
-    raise NotImplementedError("This is not implemented yet.")
+    # Find index of cluster with smallest apocentre.
     postenc = list(range(xpi, r[0].size))
-    fomaxi = np.zeros(npar)
+    xa = max(r[bound_particles][0][postenc])
     for par in bound_particles:
-        for i in range(r[par][postenc].size-1):
-            if r[par][postenc][i] > r[par][postenc][i+1]:
-                fomaxi[par] = i
-                continue
+        ra = max(r[par][postenc])
+        if xa >= ra:
+            xa = ra
+            ramaxi = par
+            xai = np.where(r[par] == xa)[0][0]
 
     # Find MGC1-like clusters
     MGC1 = np.zeros([npar], dtype=bool)
     n = 0
     for par in bound_particles:
-        mask = list(range(int(fomaxi[par]), r[par].size))
+        mask = list(range(xai, r[par].size))
         if min(r[par][mask]) < 200:
             if max(r[par][mask]) > 200:
                 MGC1[par] = True

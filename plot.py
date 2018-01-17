@@ -176,8 +176,6 @@ def separation(particles,
     ax1.set_ylabel(
             r'${\rm Distance\ from\ M31,}\ r\ {\rm [kpc]}$',
             fontsize = 16)
-    xticks = ax1.xaxis.get_major_ticks()
-    xticks[-1].label1.set_visible(False)
 
     # Right plot
     ax2.minorticks_on()
@@ -201,9 +199,9 @@ def separation(particles,
             color = 'grey', lw = 0.5, alpha = 1)
 
     # Add labels
-    plt.plot([],[], 'g-', lw = 0.5, alpha = 1,
+    ax1.plot([],[], 'g-', lw = 0.5, alpha = 1,
             label = r'${\rm MGC1-like}$')
-    plt.plot([],[], '-', color = 'grey', lw = 0.5, alpha = 1,
+    ax1.plot([],[], '-', color = 'grey', lw = 0.5, alpha = 1,
             label = r'${\rm Cluster}$')
 
     # MGC1 orbital distance.
@@ -216,6 +214,8 @@ def separation(particles,
             edgecolor = 'w', color = 'royalblue')
 
     # Finilize figure
+    xticks = ax1.xaxis.get_major_ticks()
+    xticks[-1].label1.set_visible(False)
     ax1.legend(loc='upper left')
     if not plotdir == '':
         plt.savefig(plotdir + 'separation.pdf')
