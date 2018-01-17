@@ -60,6 +60,33 @@ def setup(param, datadir = './'):
 
     return tuple(param)
 
+def encounter(param, datadir = './'):
+    """Reads information about encounters in a simulation set.
+
+    Positional Arguments:
+        param
+            Paramter that will be searched for.
+
+    Keyword Arguments:
+        datadir
+            Directory of encounter information
+    """
+    # Eric Andersson, 2018-01-17
+    import numpy as np
+
+    # Search for parameter
+    data = []
+    for line in open(datadir + 'Encounters.txt'):
+        words = line.split()
+        if not len(words) == 0:
+            if words[0] == param:
+                try:
+                    data.append(float(words[2]))
+                except ValueError:
+                    data.append(words[2])
+
+    return np.array(data)
+
 def particle(particles,
         datadir = './data/'):
     """Reads in data for particles.

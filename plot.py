@@ -221,3 +221,44 @@ def separation(particles,
         plt.savefig(plotdir + 'separation.pdf')
     plt.show()
 
+def IC_histogram(param, bins = 30, datadir = './', plotdir = ''):
+    """Plots a histogram of the distribution of the wanted paramter.
+
+    Positional Arguments:
+        param
+            Paramters that will be plotted.
+
+    Keyword Arguments:
+        bins
+            Number of bins.
+        datadir
+            Directory of encounter information.
+        plotdir
+            Directory for saving plot.
+    """
+    # Eric Andersson, 2018-01-17
+    from . import read
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    # Read in the data for the wanted paramters.
+    x = read.encounter(param, datadir = datadir)
+
+    # Set up figure.
+    fig = plt.figure()
+    plt.minorticks_on()
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.xlabel(r'${}$'.format(param), fontsize = 16)
+    plt.ylabel(r'${\rm Number\ of\ encounters}$', fontsize = 16)
+
+    # Plot data
+    plt.hist(x, bins=bins,
+            edgecolor = 'w', color = 'royalblue')
+
+    # Finilize figure
+    if not plotdir == '':
+        plt.savefig(plotdir + param + '_histogram.pdf')
+    plt.show()
+
+
