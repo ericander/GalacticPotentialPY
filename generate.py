@@ -121,12 +121,13 @@ def encounters(datadir = './'):
         # Print encounter paramters to file.
         myFile = open('Encounters.txt', 'a')
         myFile.write('Encounter {0:03d}\n'.format(count))
-        myFile.write('Incoming angle = {0:.1f} deg\n'.format(
+        myFile.write('theta = {0:.1f} deg\t Incoming angle\n'.format(
             theta*180/np.pi))
-        myFile.write('Impact angle = {0:.1f} deg\n'.format(
+        myFile.write('phi = {0:.1f} deg\t Impact angle\n'.format(
             phi*180/np.pi))
-        myFile.write('Incoming velocity = {0:.1f} km/s\n'.format(v_inc))
-        myFile.write('Impact paramter = {0:.1f} kpc\n'.format(b))
+        myFile.write(
+            'v_inc = {0:.1f} km/s\t Incoming velocity\n'.format(v_inc))
+        myFile.write('b = {0:.1f} kpc\t Impact paramter\n'.format(b))
         myFile.close()
 
         # Position of impact parameter origin.
@@ -151,10 +152,12 @@ def encounters(datadir = './'):
         # Estimate orbital paramters
         (a, e, xa, xp) = compute.orbital_parameters(rs, vs, M_M31, M_s)
         myFile = open('Encounters.txt', 'a')
-        myFile.write('Semi-major axis = {0:.2f}\n'.format(a))
-        myFile.write('Eccentricity = {0:.4f}\n'.format(e))
-        myFile.write('Pericentre distance = {0:.2f} kpc\n'.format(xp))
-        myFile.write('Apocentre distance = {0:.2f} kpc\n\n'.format(xa))
+        myFile.write('a = {0:.2f} kpc\t Semi-major axis\n'.format(a))
+        myFile.write('e = {0:.4f} \t Eccentricity\n'.format(e))
+        myFile.write(
+                'xp = {0:.2f} kpc\t Pericentre disntance\n'.format(xp))
+        myFile.write(
+                'xa = {0:.2f} kpc\t Apocentre distance\n\n'.format(xa))
         myFile.close()
 
         # Set up cluster population.
