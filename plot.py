@@ -221,10 +221,12 @@ def separation(particles,
         plt.savefig(plotdir + 'separation.pdf')
     plt.show()
 
-def IC_histogram(param, bins = 30, datadir = './', plotdir = ''):
+def IC_histogram(particles, param, bins = 30, datadir = './', plotdir = ''):
     """Plots a histogram of the distribution of the wanted paramter.
 
     Positional Arguments:
+        particles
+            List of particles that will be used.
         param
             Paramters that will be plotted.
 
@@ -242,7 +244,7 @@ def IC_histogram(param, bins = 30, datadir = './', plotdir = ''):
     import matplotlib.pyplot as plt
 
     # Read in the data for the wanted paramters.
-    x = read.encounter(param, datadir = datadir)
+    x = read.encounter(param, datadir = datadir)[particles]
 
     # Set up figure.
     fig = plt.figure()
