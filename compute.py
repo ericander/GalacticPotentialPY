@@ -230,3 +230,37 @@ def M31_vrot(r):
     ah = V_h**2 * r / (r_c**2 + r**2)
 
     return np.sqrt(r * (a_b + a_d + a_h))
+
+def M31_potential(R, z):
+    """Computes the potential of the M31 galaxy given cylindrical
+    coordinates.
+
+    Positional Arguments:
+        R
+            Radial position along the plane of the galactic disc.
+        z
+            Vertical postition perpendicular to the galactic disc.
+    """
+    # Eric Andersson, 2018-01-18
+    from . import read
+    from . import constants
+    import numpy as np
+
+    # Constants.
+    G = constants.gravitational_constant(unit = 'kpc(km/s)^2Msun')
+
+    # Read in M31 parameters.
+    (M_b, r_b, M_d, A, B, V_h, r_h) = read.setup(['M_b', 'r_b', 'M_d',
+            'A', 'B', 'V_h', 'r_h'], datadir = './')
+
+    # Bulge potential.
+    r = np.sqrt(R**2 + z**2)
+    Phi_b = - G * M_b / (r_b + r)
+
+    # Disc potential.
+    Phi_d = - G * M_d / np.sqrt(R**2 + (A + np.sqrt(z**2 + B**2)**2))
+
+    # Halo potential.
+    Phi_h = 0.5 * V_h**2 * np.log(r_h**2 + r**2)
+
+    return Phi_b + Phi_d + Phi_h
