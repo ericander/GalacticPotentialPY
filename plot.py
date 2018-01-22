@@ -304,13 +304,11 @@ def incoming_dwarfs(proj_radius = 400, datadir = './'):
             label = r'$\rm M31$', zorder = 10)
 
     # Plot data
-    xs /= np.linalg.norm((xs, ys, zs))
-    ys /= np.linalg.norm((xs, ys, zs))
-    zs /= np.linalg.norm((xs, ys, zs))
+    xs /= proj_radius
+    ys /= proj_radius
+    zs /= proj_radius
 
     X, Y = np.sqrt(2 / (1 - zs)) * xs, np.sqrt(2 / (1 - zs)) * ys
-    X /= np.linalg.norm((X,Y))
-    Y /= np.linalg.norm((X,Y))
 
     ax.plot(X, Y, '.k', label = r'$\rm Dwarf$')
 
