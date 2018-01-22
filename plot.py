@@ -263,4 +263,59 @@ def IC_histogram(particles, param, bins = 30, datadir = './', plotdir = ''):
         plt.savefig(plotdir + param + '_histogram.pdf')
     plt.show()
 
+def incoming_dwarfs(proj_radius = 400, datadir = './'):
+    """Creates a plot of how incoming dwarf galaxies are projected on a
+    spherical surface surounding the centre of M31.
 
+    Positional Arguments:
+
+    Keyword Arguments:
+    """
+    # Eric Andersson, 2018-01-22.
+    from . import read
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import NullFormatter
+
+    # Initialize variable and set parameters.
+    nenc = int(read.info('nruns', datadir = datadir))
+    xs = np.zeros(nenc)
+    ys = np.zeros(nenc)
+    zs = np.zeros(nenc)
+
+    # Read data
+    for i in range(nenc):
+        (t,x,y,z,_,_,_,_) = read.satellite(
+                datadir = datadir + 'RUN{0:03d}/data/'.format(i))
+        # Sanity check.
+        if np.sqrt(x[0]**2 + y[0]**2 + z[0]**2) < proj_radius:
+            raise ValueError("Dwarf initiated inside 400 kpc.")
+        for j in range(x.size):
+            if np.sqrt(x[j]**2 + y[j]**2 + z[j]**2) < proj_radius:
+                xs[i], ys[i], zs[i] = x[j], y[j], z[j]
+                break
+
+    # Set up figure
+    fig = plt.figure()
+    ax = plt.subplot(111, projection="hammer")
+    plt.grid(True)
+    ax.xaxis.set_major_formatter(NullFormatter())
+    ax.plot(0, 0, '.k', marker = r'$\bigotimes$', color = 'k', ms = 10,
+            label = r'$\rm M31$', zorder = 10)
+
+    # Plot data
+    xs /= np.linalg.norm((xs, ys, zs))
+    ys /= np.linalg.norm((xs, ys, zs))
+    zs /= np.linalg.norm((xs, ys, zs))
+
+    X, Y = np.sqrt(2 / (1 - zs)) * xs, np.sqrt(2 / (1 - zs)) * ys
+    X /= np.linalg.norm((X,Y))
+    Y /= np.linalg.norm((X,Y))
+
+    ax.plot(X, Y, '.k', label = r'$\rm Dwarf$')
+
+    # Finilize figure
+    ax.legend(loc = 'best', numpoints = 1, fancybox = True,
+            framealpha = 0.5)
+
+    plt.show()
