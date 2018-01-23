@@ -417,7 +417,7 @@ def dwarf_distribution3D(redist = False, proj_radius = 400,
         phi = np.arctan(ys/xs)
 
         # Redistribute in phi
-        phi += 2*np.pi*np.random.random(1)
+        phi += 2*np.pi*np.random.random(phi.size)
         xs = r * np.sin(theta) * np.cos(phi)
         ys = r * np.sin(theta) * np.sin(phi)
         zs = r * np.cos(theta)
