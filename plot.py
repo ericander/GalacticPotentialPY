@@ -313,28 +313,29 @@ def dwarf_distribution2D(redist = False, proj_radius = 400,
 
     # Compute longitude and latitude.
     r = np.sqrt(xs**2 + ys**2 + zs**2)
-    theta = np.arccos(zs/r)
+    theta = np.pi/2 - np.arccos(zs/r)
+    mask = (zs < 0)
+    theta[mask] = -(2.5*np.pi - theta[mask])
     phi = np.arctan(ys/xs)
 
     # Redistribute particles along phi \in (0,2pi) and change
     # distribution of theta from (0,pi/2) to (0,pi).
     if redist:
-        phi += 2*np.pi*np.random.random(1) - 2*np.pi
+        phi += 2*np.pi*np.random.random(phi.size)
         mask = np.random.choice(a = [True, False], size = theta.size)
         theta[mask] = -theta[mask]
 
     # Fix periodic bounardy conditions.
     # Theta
     for i in range(theta.size):
-        if abs(theta[i]) > np.pi/2:
-            if theta[i] < 0:
-                theta[i] -= np.pi
-            else:
-                theta[i] += np.pi
+        if theta[i] < -np.pi/2:
+            theta[i] += np.pi
+        elif theta[i] > np.pi/2:
+            theta[i] -= np.pi
     # Phi
     for i in range(phi.size):
-        if phi[i] < -np.pi:
-            phi[i] += 2*np.pi
+        if phi[i] > np.pi:
+            phi[i] -= 2*np.pi
 
     # Plot data
     ax.plot(phi, theta, '.r', label = r'$\rm Dwarf$')
