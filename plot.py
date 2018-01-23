@@ -313,9 +313,7 @@ def dwarf_distribution2D(redist = False, proj_radius = 400,
 
     # Compute longitude and latitude.
     r = np.sqrt(xs**2 + ys**2 + zs**2)
-    theta = np.pi/2 - np.arccos(zs/r)
-    mask = (zs < 0)
-    theta[mask] = -(2.5*np.pi - theta[mask])
+    theta = np.arcsin(zs/r)
     phi = np.arctan(ys/xs)
 
     # Redistribute particles along phi \in (0,2pi) and change
