@@ -264,7 +264,7 @@ def IC_histogram(particles, param, bins = 30, datadir = './', plotdir = ''):
     plt.show()
 
 def dwarf_distribution2D(redist = False, proj_radius = 400,
-        datadir = './'):
+        datadir = './', plotdir = ''):
     """Creates a plot of how incoming dwarf galaxies are projected on a
     spherical surface surounding the centre of M31.
 
@@ -278,6 +278,8 @@ def dwarf_distribution2D(redist = False, proj_radius = 400,
             Radius of projected sphere.
         datadir
             Directory of simulation.
+        plotdir
+            If provide, figure is saved as pdf in plotdir directory.
     """
     # Eric Andersson, 2018-01-22.
     from . import read
@@ -341,6 +343,10 @@ def dwarf_distribution2D(redist = False, proj_radius = 400,
     # Finilize figure
     ax.legend(loc = 'best', numpoints = 1, fancybox = True,
             framealpha = 0.5)
+
+    # Save figure
+    if not plotdir == '':
+        plt.savefig(plotdir + 'dwarf_3Ddist.pdf')
 
     plt.show()
 
