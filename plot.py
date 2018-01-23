@@ -263,7 +263,8 @@ def IC_histogram(particles, param, bins = 30, datadir = './', plotdir = ''):
         plt.savefig(plotdir + param + '_histogram.pdf')
     plt.show()
 
-def incoming_dwarfs(redist = False, proj_radius = 400, datadir = './'):
+def dwarf_distribution2D(redist = False, proj_radius = 400,
+        datadir = './'):
     """Creates a plot of how incoming dwarf galaxies are projected on a
     spherical surface surounding the centre of M31.
 
@@ -318,20 +319,22 @@ def incoming_dwarfs(redist = False, proj_radius = 400, datadir = './'):
     # Redistribute particles along phi \in (0,2pi) and change
     # distribution of theta from (0,pi/2) to (0,pi).
     if redist:
-        phi += 2*np.pi*np.random.random(1)
+        phi += 2*np.pi*np.random.random(1) - 2*np.pi
         mask = np.random.choice(a = [True, False], size = theta.size)
         theta[mask] = -theta[mask]
 
     # Fix periodic bounardy conditions.
+    # Theta
     for i in range(theta.size):
         if abs(theta[i]) > np.pi/2:
             if theta[i] < 0:
                 theta[i] -= np.pi
             else:
                 theta[i] += np.pi
+    # Phi
     for i in range(phi.size):
-        if phi[i] > np.pi:
-            phi[i] -= 2*np.pi
+        if phi[i] < -np.pi:
+            phi[i] += 2*np.pi
 
     # Plot data
     ax.plot(phi, theta, '.r', label = r'$\rm Dwarf$')
@@ -339,5 +342,99 @@ def incoming_dwarfs(redist = False, proj_radius = 400, datadir = './'):
     # Finilize figure
     ax.legend(loc = 'best', numpoints = 1, fancybox = True,
             framealpha = 0.5)
+
+    plt.show()
+
+def dwarf_distribution3D(redist = False, proj_radius = 400,
+        datadir = './', plotdir = ''):
+    """Creates a plot of how incoming dwarf galaxies are projected on a
+    spherical surface surounding the centre of M31.
+
+    Positional Arguments:
+
+    Keyword Arguments:
+        redist
+            If True, then points will be distributed in phi and on both
+            hemispheres.
+        proj_radius
+            Radius of projected sphere.
+        datadir
+            Directory of simulation.
+        plotdir
+            If provide, figure is saved as pdf in plotdir directory.
+    """
+    # Eric Andersson, 2018-01-23.
+    from . import read
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import axis3d
+
+    # Initialize variable and set parameters.
+    nenc = int(read.info('nruns', datadir = datadir))
+    xs = np.zeros(nenc)
+    ys = np.zeros(nenc)
+    zs = np.zeros(nenc)
+
+    # Read data
+    for i in range(nenc):
+        (t,x,y,z,_,_,_,_) = read.satellite(
+                datadir = datadir + 'RUN{0:03d}/data/'.format(i))
+        # Sanity check.
+        if np.sqrt(x[0]**2 + y[0]**2 + z[0]**2) < proj_radius:
+            raise ValueError("Dwarf initiated inside 400 kpc.")
+        for j in range(x.size):
+            if np.sqrt(x[j]**2 + y[j]**2 + z[j]**2) < proj_radius:
+                xs[i], ys[i], zs[i] = x[j], y[j], z[j]
+                break
+
+    # Set up figure.
+    fig, ax = plt.subplots(1, 1, subplot_kw={'projection':'3d',
+        'aspect':'equal'})
+    ax.grid(False)
+    ax.set_xlim(-(proj_radius + 100), proj_radius + 100)
+    ax.set_ylim(-(proj_radius + 100), proj_radius + 100)
+    ax.set_zlim(-(proj_radius + 100), proj_radius + 100)
+    ax.set_xlabel(r'$x,\,{\rm kpc}$', fontsize = 16)
+    ax.set_ylabel(r'$y,\,{\rm kpc}$', fontsize = 16)
+    ax.set_zlabel(r'$z,\,{\rm kpc}$', fontsize = 16)
+    ax.scatter(0, 0, 0, '.k', marker = r'$\bigotimes$', c = 'k',
+            s = 45, label = r'$\rm M31$', zorder = 10)
+
+    # Add wireframe at proj_radius.
+    phi = np.linspace(0, np.pi, 20)
+    theta = np.linspace(0, 2 * np.pi, 40)
+    ax.plot_wireframe(
+            proj_radius * np.outer(np.sin(theta), np.cos(phi)),
+            proj_radius * np.outer(np.sin(theta), np.sin(phi)),
+            proj_radius * np.outer(np.cos(theta), np.ones_like(phi)),
+            color='grey', rstride=1, cstride=1, alpha = 0.4)
+
+    # Redistribute particles along phi \in (0,2pi) and change
+    # distribution of theta from (0,pi/2) to (0,pi).
+    if redist:
+        r = np.sqrt(xs**2 + ys**2 + zs**2)
+        theta = np.arccos(zs/r)
+        phi = np.arctan(ys/xs)
+
+        # Redistribute in phi
+        phi += 2*np.pi*np.random.random(1)
+        xs = r * np.outer(np.sin(theta), np.cos(phi))
+        ys = r * np.outer(np.sin(theta), np.sin(phi))
+        zs = r * np.outer(np.cos(theta), np.ones_like(phi))
+        # Redistribute in theta
+        mask = np.random.choice(a = [True, False], size = theta.size)
+        zs[mask] = -zs[mask]
+
+    # Plot data
+    ax.scatter(xs, ys, zs, s=10, c='r', zorder=9,
+            label = r'$\rm Dwarf$')
+
+    # Finialize figure
+    ax.legend(loc = 'best', numpoints = 1, fancybox = True,
+            framealpha = 0.3, scatterpoints = 1)
+
+    # Save figure
+    if not plotdir == '':
+        plt.savefig(plotdir + 'dwarf_3Ddist.pdf')
 
     plt.show()
