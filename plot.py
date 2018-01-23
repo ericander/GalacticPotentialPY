@@ -263,13 +263,20 @@ def IC_histogram(particles, param, bins = 30, datadir = './', plotdir = ''):
         plt.savefig(plotdir + param + '_histogram.pdf')
     plt.show()
 
-def incoming_dwarfs(proj_radius = 400, datadir = './'):
+def incoming_dwarfs(redist = False, proj_radius = 400, datadir = './'):
     """Creates a plot of how incoming dwarf galaxies are projected on a
     spherical surface surounding the centre of M31.
 
     Positional Arguments:
 
     Keyword Arguments:
+        redist
+            If True, then points will be distributed in phi and on both
+            hemispheres.
+        proj_radius
+            Radius of projected sphere.
+        datadir
+            Directory of simulation.
     """
     # Eric Andersson, 2018-01-22.
     from . import read
@@ -303,14 +310,31 @@ def incoming_dwarfs(proj_radius = 400, datadir = './'):
     ax.plot(0, 0, '.k', marker = r'$\bigotimes$', color = 'k', ms = 10,
             label = r'$\rm M31$', zorder = 10)
 
+    # Compute longitude and latitude.
+    r = np.sqrt(xs**2 + ys**2 + zs**2)
+    theta = np.arccos(zs/r)
+    phi = np.arctan(ys/xs)
+
+    # Redistribute particles along phi \in (0,2pi) and change
+    # distribution of theta from (0,pi/2) to (0,pi).
+    if redist:
+        phi += 2*np.pi*np.random.random(1)
+        mask = np.random.choice(a = [True, False], size = theta.size)
+        theta[mask] = -theta[mask]
+
+    # Fix periodic bounardy conditions.
+    for i in range(theta.size):
+        if abs(theta[i]) > np.pi/2:
+            if theta[i] < 0:
+                theta[i] -= np.pi
+            else:
+                theta[i] += np.pi
+    for i in range(phi.size):
+        if phi[i] > np.pi:
+            phi[i] -= 2*np.pi
+
     # Plot data
-    xs /= proj_radius
-    ys /= proj_radius
-    zs /= proj_radius
-
-    X, Y = np.sqrt(2 / (1 - zs)) * xs, np.sqrt(2 / (1 - zs)) * ys
-
-    ax.plot(X, Y, '.k', label = r'$\rm Dwarf$')
+    ax.plot(phi, theta, '.r', label = r'$\rm Dwarf$')
 
     # Finilize figure
     ax.legend(loc = 'best', numpoints = 1, fancybox = True,
