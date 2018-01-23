@@ -418,9 +418,9 @@ def dwarf_distribution3D(redist = False, proj_radius = 400,
 
         # Redistribute in phi
         phi += 2*np.pi*np.random.random(1)
-        xs = r * np.outer(np.sin(theta), np.cos(phi))
-        ys = r * np.outer(np.sin(theta), np.sin(phi))
-        zs = r * np.outer(np.cos(theta), np.ones_like(phi))
+        xs = r * np.sin(theta) * np.cos(phi)
+        ys = r * np.sin(theta) * np.sin(phi)
+        zs = r * np.cos(theta)
         # Redistribute in theta
         mask = np.random.choice(a = [True, False], size = theta.size)
         zs[mask] = -zs[mask]
