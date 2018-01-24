@@ -29,7 +29,8 @@ def orbital_parameters(r, v, m1, m2):
     G = constants.gravitational_constant(unit = 'kpc(km/s)^2Msun')
 
     # Semi-major axis
-    a = 1 / ((2/np.linalg.norm(r)) - (np.linalg.norm(v)**2 / (G * (m1 + m2))))
+    a = 1 / ((2/np.linalg.norm(r)) - (np.linalg.norm(v)**2 / \
+            (G * (m1 + m2))))
 
     # Eccentricity
     h = np.linalg.norm(np.cross(r, v))
@@ -69,13 +70,24 @@ def tidal_radius(r, v, M_M31, Ms,
     from . import read
 
     # Calculate orbital parameters.
-    if xp == '':
-        (a, e, xa, xp) = orbital_parameters(r, v, M_M31, Ms)
+    if r.shape[1] == 1:
+        if xp == '':
+            (a, e, xa, xp) = orbital_parameters(r, v, M_M31, Ms)
+        else:
+            (a, e, xa, _) = orbital_parameters(r, v, M_M31, Ms)
     else:
-        (a, e, xa, _) = orbital_parameters(r, v, M_M31, Ms)
+        if xp == '':
+            (a, e, xa, xp) = orbital_parameters(r[...,0], v[...,0],
+                    M_M31, Ms)
+        else:
+            (a, e, xa, _) = orbital_parameters(r[...,0], v[...,0],
+                    M_M31, Ms)
 
     # Compute tidal radius
-    x = np.linalg.norm(r)
+    if r.shape[1] == 1:
+        x = np.linalg.norm(r)
+    else:
+        x = np.linalg.norm(r, axis = 0)
     L = a*(1 - e**2)
     rt = (x**4 * L * Ms / M_M31)**(1/3) * \
             ( (np.sqrt(alpha**2 + 1 + (2*x/L)) - alpha ) / \

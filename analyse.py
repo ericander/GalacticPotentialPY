@@ -8,7 +8,7 @@
 # Eric Andersson, 2018-01-12
 #=======================================================================
 
-def retained(particles, r, rs, datadir = './data'):
+def retained(particles, r, rs, datadir = './../'):
     """Computes the number of cluster retained by the dwarf galaxy
     in the encounter.
 
@@ -32,7 +32,7 @@ def retained(particles, r, rs, datadir = './data'):
     from . import constants
 
     # Encounter parameters
-    Ms = read.info('M_s')
+    Ms = read.info(info = 'M_s', datadir = datadir)
     M_M31 = constants.M31_mass()
 
     # Compute roche-lobe radius for dwarf.
@@ -97,7 +97,7 @@ def unbound(particles, r, v, ret = '', rs = '', datadir = './data'):
     return (unbound == 1), n
 
 def MGC1_like(particles,
-        rs = '', r = '', v = '',
+        rs = '', r = '', v = '', ret = '', unb = '',
         datadir = './data/'):
     """Computes the fraction of MGC1-like clusters in an encounter.
 
@@ -112,6 +112,10 @@ def MGC1_like(particles,
             Velocity of all clusters
         rs
             Distance from M31 to the dwarf galaxy.
+        ret
+            Retained clusters. Calculated unless provided.
+        unb
+            Unbound clusters. Calculated unless provided.
         datadir
             Directory of data.
     """
@@ -136,17 +140,17 @@ def MGC1_like(particles,
     xpi = np.argmin(rs)
 
     # Store only data at last step
-    rl = np.zeros(npar)
-    vl = np.zeros(npar)
-    for par in range(npar):
-        rl[par] = r[par][-1]
-        vl[par] = v[par][-1]
+    rl = r[:,-1]
+    vl = v[:,-1]
 
     # Retained clusters.
-    ret, nret = retained(particles, rl, rs[-1], datadir)
+    if type(ret) == str:
+        ret, nret = retained(particles, rl, rs[-1], datadir)
 
     # Unbound clusters.
-    unb, nunb = unbound(particles, rl, vl, ret = ret, datadir = datadir)
+    if type(ret) == str:
+        unb, nunb = unbound(particles, rl, vl, ret = ret,
+                datadir = datadir)
 
     # Remove retained and unbound clusters.
     M31GC = (ret == False) & (unb == False)
