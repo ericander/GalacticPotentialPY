@@ -32,7 +32,7 @@ def retained(particles, r, rs, datadir = './../'):
     from . import constants
 
     # Encounter parameters
-    Ms = read.info(info = 'M_s', datadir = datadir)
+    (Ms,) = read.setup(param = 'M_s', datadir = datadir)
     M_M31 = constants.M31_mass()
 
     # Compute roche-lobe radius for dwarf.
@@ -145,12 +145,11 @@ def MGC1_like(particles,
 
     # Retained clusters.
     if type(ret) == str:
-        ret, nret = retained(particles, rl, rs[-1], datadir)
+        ret, nret = retained(particles, rl, rs[-1])
 
     # Unbound clusters.
     if type(ret) == str:
-        unb, nunb = unbound(particles, rl, vl, ret = ret,
-                datadir = datadir)
+        unb, nunb = unbound(particles, rl, vl, ret = ret)
 
     # Remove retained and unbound clusters.
     M31GC = (ret == False) & (unb == False)
