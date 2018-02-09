@@ -148,7 +148,7 @@ def MGC1_like(particles,
         ret, nret = retained(particles, rl, rs[-1])
 
     # Unbound clusters.
-    if type(ret) == str:
+    if type(unb) == str:
         unb, nunb = unbound(particles, rl, vl, ret = ret)
 
     # Remove retained and unbound clusters.
