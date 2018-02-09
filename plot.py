@@ -310,8 +310,6 @@ def dwarf_distribution2D(redist = False, proj_radius = 400,
     ax = plt.subplot(111, projection="hammer")
     plt.grid(True)
     ax.xaxis.set_major_formatter(NullFormatter())
-    ax.plot(0, 0, '.k', marker = r'$\bigotimes$', color = 'k', ms = 10,
-            label = r'$\rm M31$', zorder = 10)
 
     # Compute longitude and latitude.
     r = np.sqrt(xs**2 + ys**2 + zs**2)
@@ -340,13 +338,9 @@ def dwarf_distribution2D(redist = False, proj_radius = 400,
     # Plot data
     ax.plot(phi, theta, '.r', label = r'$\rm Dwarf$')
 
-    # Finilize figure
-    ax.legend(loc = 'best', numpoints = 1, fancybox = True,
-            framealpha = 0.5)
-
     # Save figure
     if not plotdir == '':
-        plt.savefig(plotdir + 'dwarf_3Ddist.pdf')
+        plt.savefig(plotdir + 'dwarf_2Ddist.pdf')
 
     plt.show()
 
