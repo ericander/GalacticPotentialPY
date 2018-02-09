@@ -171,6 +171,7 @@ def separation(particles,
     ax1.minorticks_on()
     ax1.set_yscale('log')
     ax1.set_ylim(1e0, 1e4)
+    ax1.set_xlim(t[0]/1000, t[-1]/1000)
     ax1.set_xlabel(
             r'${\rm Time,}\ t\ [{\rm Gyr}]$', fontsize = 16)
     ax1.set_ylabel(
