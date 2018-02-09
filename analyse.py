@@ -32,7 +32,7 @@ def retained(particles, r, rs, datadir = './../'):
     from . import constants
 
     # Encounter parameters
-    (Ms,) = read.setup(param = 'M_s', datadir = datadir)
+    (Ms,) = read.setup(param = ['M_s'], datadir = datadir)
     M_M31 = constants.M31_mass()
 
     # Compute roche-lobe radius for dwarf.
