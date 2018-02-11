@@ -158,17 +158,21 @@ def MGC1_like(particles,
     # Find index at with dwarf crosses 300 kpc a second time.
     postenc = list(range(xpi, r[0].size))
     rsp = rs[postenc]
-    rsp = min(rsp[rsp > 300])
-    xai = np.where(rs == rsp)[0][0]
+    failed = False
+    try:
+        rsp = min(rsp[rsp > 300])
+        xai = np.where(rs == rsp)[0][0]
+    except ValueError:
+        failed = True
 
     # Find MGC1-like clusters
     MGC1 = np.zeros([npar], dtype=bool)
     n = 0
-    for par in bound_particles:
-        mask = list(range(xai, r[par].size))
-        if min(r[par][mask]) < 200:
-            if max(r[par][mask]) > 200:
-                MGC1[par] = True
-                n+=1
-
+    if not failed:
+        for par in bound_particles:
+            mask = list(range(xai, r[par].size))
+            if min(r[par][mask]) < 200:
+                if max(r[par][mask]) > 200:
+                    MGC1[par] = True
+                    n+=1
     return MGC1, n
