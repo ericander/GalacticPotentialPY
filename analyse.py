@@ -155,15 +155,11 @@ def MGC1_like(particles,
     M31GC = (ret == False) & (unb == False)
     bound_particles = np.array(particles)[M31GC]
 
-    # Find index of cluster with smallest apocentre.
+    # Find index at with dwarf crosses 300 kpc a second time.
     postenc = list(range(xpi, r[0].size))
-    xa = max(r[bound_particles][0][postenc])
-    for par in bound_particles:
-        ra = max(r[par][postenc])
-        if xa >= ra:
-            xa = ra
-            ramaxi = par
-            xai = np.where(r[par] == xa)[0][0]
+    rsp = rs[postenc]
+    rsp = min(rsp[rsp > 300])
+    xai = np.where(rs == rsp)[0][0]
 
     # Find MGC1-like clusters
     MGC1 = np.zeros([npar], dtype=bool)
