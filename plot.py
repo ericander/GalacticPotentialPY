@@ -115,7 +115,7 @@ def trajectories2D(plane, particles,
 
 def separation(particles,
         satellite = True, datadir = './data/', plotdir = '',
-        dontshow = False):
+        dontshow = False, filename = 'separation'):
     """Plots the separation between the particles and M31 as function of
     time for a given encounter.
 
@@ -132,6 +132,8 @@ def separation(particles,
             Function saves a pdf of figure in this directory if given.
         dontshow
             If True, figure will be cleared when finished.
+        filename
+            Namn of file if plot is saved.
     """
     # Eric Andersson, 2018-01-12
     import numpy as np
@@ -222,7 +224,7 @@ def separation(particles,
     xticks[-1].label1.set_visible(False)
     ax1.legend(loc='upper left')
     if not plotdir == '':
-        plt.savefig(plotdir + 'separation.pdf')
+        plt.savefig(plotdir + filename + '.pdf')
     if not dontshow:
         plt.show()
     if dontshow:
