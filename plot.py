@@ -156,7 +156,7 @@ def separation(particles,
         rp[par] = np.sqrt(x[par]**2 + y[par]**2 + z[par]**2)
 
     # Count MGC1-like
-    (MGC1, _)= analyse.MGC1_like(particles)
+    (MGC1, _)= analyse.MGC1_like(particles, datadir = datadir)
 
     # Compute final distance.
     rpf = np.zeros(npar)
