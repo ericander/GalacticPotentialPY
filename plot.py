@@ -114,7 +114,8 @@ def trajectories2D(plane, particles,
     plt.show()
 
 def separation(particles,
-        satellite = True, datadir = './data/', plotdir = ''):
+        satellite = True, datadir = './data/', plotdir = '',
+        dontshow = False):
     """Plots the separation between the particles and M31 as function of
     time for a given encounter.
 
@@ -129,6 +130,8 @@ def separation(particles,
             Directory of data.
         plotdir
             Function saves a pdf of figure in this directory if given.
+        dontshow
+            If True, figure will be cleared when finished.
     """
     # Eric Andersson, 2018-01-12
     import numpy as np
@@ -220,7 +223,10 @@ def separation(particles,
     ax1.legend(loc='upper left')
     if not plotdir == '':
         plt.savefig(plotdir + 'separation.pdf')
-    plt.show()
+    if not dontshow:
+        plt.show()
+    if dontshow:
+        plt.clf()
 
 def IC_histogram(particles, param, bins = 30, datadir = './', plotdir = ''):
     """Plots a histogram of the distribution of the wanted paramter.
