@@ -146,12 +146,12 @@ def MGC1_like(particles,
     # Retained clusters.
     if type(ret) == str:
         ret, nret = retained(particles, rl, rs[-1],
-                datadir = datadir + './../..')
+                datadir = datadir + './../../')
 
     # Unbound clusters.
     if type(unb) == str:
         unb, nunb = unbound(particles, rl, vl, ret = ret,
-                datadir = datadir + './../..')
+                datadir = datadir + './../../')
 
     # Remove retained and unbound clusters.
     M31GC = (ret == False) & (unb == False)
