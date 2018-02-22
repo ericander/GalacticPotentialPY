@@ -200,7 +200,7 @@ def encounters(datadir = './'):
         myFile.close()
         count += 1
 
-def initial_conditions(nenc, datadir = './'):
+def initial_conditions(nenc, traj, datadir = './'):
     """Generates a set of initial conditions with homogeneous
     distribution in energy and pericentre distance.
 
@@ -221,8 +221,8 @@ def initial_conditions(nenc, datadir = './'):
     import os
 
     # Read set-up file.
-    (Rmin, Rmax, Emin, Emax) = read.setup(
-            param = ['Rmin', 'Rmax', 'Emin', 'Emax'], datadir = datadir)
+    (Rmin, Rmax, Emax) = read.setup(
+            param = ['Rmin', 'Rmax', 'Emax'], datadir = datadir)
 
     # Loop over encounters.
     for run in range(nenc):
@@ -236,8 +236,12 @@ def initial_conditions(nenc, datadir = './'):
         z = rmin[2]
         Phi = compute.M31_potential(R, z, model = 'Geehan')
         Phi500 = compute.M31_potential(500, 0, model = 'Geehan')
-        E = Phi500 * draw.energy(N = 1, lim = (0, 1))[0]
-        print(E)
+        if traj == 'Bound':
+            E = Phi500 * draw.energy(N = 1, lim = (0, 1))[0]
+        elif traj == 'Parabolic':
+            E = 0
+        elif traj == 'Hyperbolic':
+            E = draw.energy(N = 1, lim = (0, Emax))
         v = np.sqrt(2*E - 2*Phi)
 
         # Draw direction of angular momentum.
@@ -256,10 +260,7 @@ def initial_conditions(nenc, datadir = './'):
             except OSError as exc:
                 if exc.errno != errno.EEXIST:
                     raise
-        print(run)
-        print(np.linalg.norm(rmin))
-        print(np.linalg.norm(v))
-        print('')
+
         # Overwrite existing data.
         myFile = open(filename, 'w')
         myFile.write("%4.5f\t%4.5f\t%4.5f\t%3.5f\t%3.5f\t%3.5f\n"
