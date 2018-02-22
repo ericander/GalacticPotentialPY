@@ -237,21 +237,25 @@ def M31_vrot(r):
             param = ['M_b', 'r_b', 'M_d', 'A', 'B', 'V_h', 'r_h'])
 
     # Gravitational acceleration
-    ab = G * M_b / (r_b + r)**2
-    ad = G * M_d * r / ( (a + b)**2 + r**2 )**(3/2)
-    ah = V_h**2 * r / (r_c**2 + r**2)
+    a_b = G * M_b / (r_b + r)**2
+    a_d = G * M_d * r / ( (a + b)**2 + r**2 )**(3/2)
+    a_h = V_h**2 * r / (r_c**2 + r**2)
 
     return np.sqrt(r * (a_b + a_d + a_h))
 
-def M31_potential(R, z):
+def M31_potential(R, z, model = 'Bekki'):
     """Computes the potential of the M31 galaxy given cylindrical
     coordinates.
 
     Positional Arguments:
         R
-            Radial position along the plane of the galactic disc.
+            Position in along R direction.
         z
-            Vertical postition perpendicular to the galactic disc.
+            Position along z axis.
+
+    Keyword Arguments:
+        model
+            Which potenital model to use.
     """
     # Eric Andersson, 2018-01-18
     from . import read
@@ -259,20 +263,159 @@ def M31_potential(R, z):
     import numpy as np
 
     # Constants.
-    G = constants.gravitational_constant(unit = 'kpc(km/s)^2Msun')
+    G = 4.558e-13 * np.pi**2
 
-    # Read in M31 parameters.
-    (M_b, r_b, M_d, A, B, V_h, r_h) = read.setup(['M_b', 'r_b', 'M_d',
-            'A', 'B', 'V_h', 'r_h'], datadir = './')
-
-    # Bulge potential.
+    # Translate coordinates.
     r = np.sqrt(R**2 + z**2)
-    Phi_b = - G * M_b / (r_b + r)
 
-    # Disc potential.
-    Phi_d = - G * M_d / np.sqrt(R**2 + (A + np.sqrt(z**2 + B**2)**2))
+    if model == 'Bekki':
+        # Parameters.
+        M_b = 9.2e10
+        r_b = 0.7
+        M_d = 1.3e11
+        A = 6.5
+        B = 0.26
+        r_h = 12
+        V_h = 186
+        M_h = 1.24e12
+        r_cut = 155.08
+        Phi_0 = 208993.00328
 
-    # Halo potential.
-    Phi_h = 0.5 * V_h**2 * np.log(r_h**2 + r**2)
+        # Bulge potential.
+        Phi_b = - G * M_b / (r_b + r)
 
-    return Phi_b + Phi_d + Phi_h
+        # Disc potential.
+        Phi_d = - G * M_d / \
+                np.sqrt(R**2 + (A + np.sqrt(z**2 + B**2))**2)
+
+        # Halo potential.
+        Phi_h = 0.5 * V_h**2 * np.log(r_h**2 + r**2) - Phi_0
+
+        if r.size > 1:
+            cut = (r > r_cut)
+            Phi_h[cut] = - G * M_h / r[cut]
+        elif r > r_cut:
+            Phi_h = - G * M_h / r
+
+        return Phi_b + Phi_d + Phi_h
+
+    elif model == 'Geehan':
+        # Parameters.
+        M_b = 3.3e10
+        r_b = 0.61
+        M_d = 1.034365e11
+        A = 6.42833
+        B = 0.26476
+        r_h = 8.18
+        delta = 27e4
+        rho = 136
+
+        # Bulge potential.
+        Phi_b = - G * M_b / (r_b + r)
+
+        # Disc potential.
+        Phi_d = - G * M_d / \
+                np.sqrt(R**2 + (A + np.sqrt(z**2 + B**2))**2)
+
+        # Halo potential.
+        Phi_h = (-4 * np.pi * G * delta * rho * r_h**3 / r) * \
+                np.log((r + r_h)/r_h)
+
+        return Phi_b + Phi_d + Phi_h
+
+    else:
+        raise ValueError(model + ' is not available. Valid ' + \
+            'models are Bekki or Geehan (not implemented).')
+
+def M31_enclosed_mass(R, z, model = 'Bekki'):
+    """ Computes the enclosed mass of the M31 galaxy given position.
+    The function assumes the mass enclosed within a sphere with radius
+    at the given position.
+
+    Positional Arguments:
+        R
+            Distance along the plane of the galactic disc.
+        z
+            Vertical distance, perpendicular to R.
+
+    Keyword Arguments:
+        model
+            The potential model that is used.
+    """
+    # Eric Andersson, 2018-02-19.
+    import numpy as np
+    from scipy import integrate
+    from . import constants
+
+    # Constants
+    G = constants.gravitational_constant()
+
+    # Set limits.
+    r = np.sqrt(R**2 + z**2)
+    Rlim = [0, R]
+    zlim = [0, z]
+    rlim = [0, r]
+
+    # Set up model parameters.
+    if model == 'Bekki':
+        # Parameters.
+        M_b = 9.2e10
+        r_b = 0.7
+        Md = 1.3e11
+        a = 6.5
+        b = 0.26
+        r_h = 12
+        V_h = 186
+        M_h = 1.24e12
+        r_cut = 155.08
+        Phi_0 = 208993.00328
+
+        # Bulge
+        M_bulge = M_b * (r**2 / (r + r_b)**2)
+
+        # Disc
+        def f(R,z):
+            return ((a*R**2 + (a + 3*np.sqrt(z**2 + b**2)) * \
+            (a + np.sqrt(z**2 + b**2))**2) / \
+            ( (R**2 + (a + np.sqrt(z**2 + b**2))**2)**(5/2) * \
+            (z**2 + b**2)**(3/2) ))*R
+
+        I = integrate.nquad(f, [Rlim, zlim])
+
+        M_disc = (b**2 * Md / 2) * I[0]
+
+        # Halo
+        if r < 300:
+            def f(r):
+                return ((3*r_h**2 + r**2)*r**2) / (r_h**2 + r**2)**2
+
+            I = integrate.nquad(f, [rlim])
+
+            M_halo = V_h**2 / G * I[0]
+        else:
+            M_halo = M_h
+
+    if model == 'Geehan':
+        # Parameters.
+        M_b = 3.3e10
+        r_b = 0.61
+        M_d = 1.0343e11
+        A = 6.43
+        B = 0.2647
+        r_h = 8.8
+        delta = 27e4
+        rho = 140
+        r_d = 5.4
+        sigma = 4.6e8
+
+        # Bulge
+        M_bulge = M_b * r**2 / (r_b + r)**2
+
+        # Disc
+        M_disc = 2*np.pi*sigma*r_d**2*(1 - (1 + r/r_d)*np.exp(-r/r_d))
+
+        # Halo
+        M_halo = 4*np.pi*G*delta*rho*r_h**3 * (np.log((r + r_h)/r_h) \
+                - r / (r + r_h))
+
+    return M_bulge + M_disc + M_halo

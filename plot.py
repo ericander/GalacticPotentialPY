@@ -8,7 +8,7 @@
 # Eric Andersson, 2018-01-11
 #=======================================================================
 
-def trajectories2D(plane, particles,
+def trajectories2D(plane, particles = '',
         xlim = (-250, 250), ylim = (-250, 250), legend = True,
         satellite = True, datadir = './data/', plotdir = ''):
     """Plots the projected trajectory of the particles in the given
@@ -35,15 +35,16 @@ def trajectories2D(plane, particles,
     from . import read
 
     # Read in data
-    if plane == 'xy':
-        (_, x, y, _, _, _, _) = read.particle(particles, datadir)
-    elif plane == 'xz':
-        (_, x, _, y, _, _, _) = read.particle(particles, datadir)
-    elif plane == 'yz':
-        (_, _, x, y, _, _, _) = read.particle(particles, datadir)
-    else:
-        raise ValueError(
-            "Keyword plane only accepts 'xy', 'xz', or 'yz'. ")
+    if type(particles) == list:
+        if plane == 'xy':
+            (_, x, y, _, _, _, _) = read.particle(particles, datadir)
+        elif plane == 'xz':
+            (_, x, _, y, _, _, _) = read.particle(particles, datadir)
+        elif plane == 'yz':
+            (_, _, x, y, _, _, _) = read.particle(particles, datadir)
+        else:
+            raise ValueError(
+                "Keyword plane only accepts 'xy', 'xz', or 'yz'. ")
     if satellite:
         if plane == 'xy':
             (_, xs, ys, _, _, _, _, col) = read.satellite(datadir)
@@ -100,8 +101,10 @@ def trajectories2D(plane, particles,
         plt.plot(xs[col], ys[col], '--', color = 'grey', lw = 2)
 
     # Plot particle trajectories.
-    for par in particles:
-        plt.plot(x[par], y[par], '-', label = 'particle_{}'.format(par))
+    if type(particles) == list:
+        for par in particles:
+            plt.plot(x[par], y[par], '-',
+                    label = 'particle_{}'.format(par))
 
     # Add legend
     if legend:
@@ -144,8 +147,8 @@ def separation(particles,
 
 
     # Read in data
-    (_, x, y, z, _, _, _) = read.particle(particles, datadir)
-    (t, xs, ys, zs, _, _, _, _) = read.satellite(datadir)
+    (_, x, y, z, vx, vy, vz, _, _) = read.particle(particles, datadir)
+    (t, xs, ys, zs, _, _, _, _, _, _) = read.satellite(datadir)
     npar, nt = x.shape
 
     # Compute the distances to M31.
@@ -154,11 +157,14 @@ def separation(particles,
 
     # Globular clusters
     rp = np.zeros([npar, nt])
+    vp = np.zeros([npar, nt])
     for par in particles:
         rp[par] = np.sqrt(x[par]**2 + y[par]**2 + z[par]**2)
+        vp[par] = np.sqrt(vx[par]**2 + vy[par]**2 + vz[par]**2)
 
     # Count MGC1-like
-    (MGC1, _)= analyse.MGC1_like(particles, datadir = datadir)
+    (MGC1, _)= analyse.MGC1_like(particles, rs = rs, r = rp, v = vp,
+            datadir = datadir)
 
     # Compute final distance.
     rpf = np.zeros(npar)
@@ -186,10 +192,11 @@ def separation(particles,
     # Right plot
     ax2.minorticks_on()
     ax2.set_ylim(1e0, 1e4)
+    ax2.set_xlim(6e-1, 1e3)
+    ax2.set_xscale('log')
     ax2.set_yscale('log')
     ax2.yaxis.set_major_formatter(NullFormatter())
     ax2.set_xlabel(r'${\rm Number\ of\ Clusters}$', fontsize = 16)
-    ax2.set_xscale('log')
 
     # Plot data
     # Dwarf galaxy
@@ -323,7 +330,7 @@ def dwarf_distribution2D(redist = False, proj_radius = 400,
     # Compute longitude and latitude.
     r = np.sqrt(xs**2 + ys**2 + zs**2)
     theta = np.arcsin(zs/r)
-    phi = np.arctan(ys/xs)
+    phi = np.arctan2(ys,xs)
 
     # Redistribute particles along phi \in (0,2pi) and change
     # distribution of theta from (0,pi/2) to (0,pi).

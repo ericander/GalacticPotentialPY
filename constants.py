@@ -7,7 +7,7 @@
 # Eric Andersson, 2018-01-14
 #=======================================================================
 
-def gravitational_constant(unit = 'SI'):
+def gravitational_constant(unit = 'kpc(km/s)^2Msun'):
     """The Newtonian gravitational constant.
 
     Keyword Arguments:
@@ -19,7 +19,7 @@ def gravitational_constant(unit = 'SI'):
     if unit == 'SI':
         return 6.67408e-11
     elif unit == 'kpc(km/s)^2Msun':
-        return 4.300912722e-6
+        return 0.00430091722 / 1000
     elif unit == 'kpc(kpc/Myr)^2Msun':
         return 4.558e-13 * np.pi**2
     else:

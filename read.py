@@ -120,12 +120,15 @@ def particle(particles,
     vx = np.zeros([npar, ndat])
     vy = np.zeros([npar, ndat])
     vz = np.zeros([npar, ndat])
+    Ek = np.zeros([npar, ndat])
+    Ep = np.zeros([npar, ndat])
 
     # Read data.
     for par in particles:
         data = pd.read_csv(datadir + "particle_{}.txt".format(par),
                 delimiter="\t",
-                names = ["t", "x", "y", "z", "vx", "vy", "vz"])
+                names = ["t", "x", "y", "z", "vx", "vy", "vz",
+                    "Ek", "Ep"])
         t[par] = data.t
         x[par] = data.x
         y[par] = data.y
@@ -133,8 +136,10 @@ def particle(particles,
         vx[par] = data.vx * K
         vy[par] = data.vy * K
         vz[par] = data.vz * K
+        Ek[par] = data.Ek
+        Ep[par] = data.Ep
 
-    return (t, x, y, z, vx, vy, vz)
+    return (t, x, y, z, vx, vy, vz, Ek, Ep)
 
 
 def satellite(datadir = './data/'):
@@ -154,7 +159,8 @@ def satellite(datadir = './data/'):
 
     data = pd.read_csv(datadir + "satellite.txt",
             delimiter="\t",
-            names = ["t", "x", "y", "z", "vx", "vy", "vz", "col"])
+            names = ["t", "x", "y", "z", "vx", "vy", "vz", "col",
+                "Ek", "Ep"])
 
     t = np.array(data.t)
     x =  np.array(data.x)
@@ -164,7 +170,9 @@ def satellite(datadir = './data/'):
     vy = np.array(data.vy) * K
     vz = np.array(data.vz) * K
     col = np.array(data.col)
-    return (t, x, y, z, vx, vy, vz, col)
+    Ek = np.array(data.Ek)
+    Ep = np.array(data.Ep)
+    return (t, x, y, z, vx, vy, vz, col, Ek, Ep)
 
 def GC_sample(datadir = './'):
     """Reads the generated sample of clusters.

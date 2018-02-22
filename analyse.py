@@ -127,13 +127,13 @@ def MGC1_like(particles,
 
     # Load data unless provided
     if type(r) == str or type(v) == str:
-        (_, x, y, z, vx, vy, vz) = read.particle(particles, datadir)
+        (_, x, y, z, vx, vy, vz, _, _) = read.particle(particles, datadir)
         r = np.zeros(x.shape)
         v = np.zeros(x.shape)
         r[:] = np.sqrt(x[:]**2 + y[:]**2 + z[:]**2)
         v[:] = np.sqrt(vx[:]**2 + vy[:]**2 + vz[:]**2)
     if type(rs) == str:
-        (_, xs, ys, zs, vx, vy, vz, _) = read.satellite(datadir)
+        (_, xs, ys, zs, vx, vy, vz, _, _, _) = read.satellite(datadir)
         rs = np.sqrt(xs**2 + ys**2 + zs**2)
 
     # Index at closest approach

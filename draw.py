@@ -103,3 +103,47 @@ def incoming_velocity(trajectory, r, v_max = 29979.2):
     else:
         raise ValueError(
                 trajectory + ' is not a valid trajectory')
+
+def pericentre(N, lim):
+    """Generates a pericentre position for a dwarf galaxy.
+
+    Positional Arguments:
+        N
+            Number of pericentres.
+        lim
+            Limits of pericentre length.
+
+    """
+    # Eric Andersson, 2018-02-14.
+    from . import compute
+
+    return compute.sample_sphere(lim, N, dist = 'random')[0]
+
+def energy(N, lim):
+    """Draws a random total energy in the range given by lim.
+
+    Positional Arguments:
+        N
+            Number of energies.
+        lim
+            Limits of energy.
+
+    """
+    # Eric Andersson, 14-02-2018.
+    import numpy as np
+
+    return np.random.uniform(lim[0], lim[1], N)
+
+def angular_momentum_direction(N):
+    """Generates a normalized direction of angular momentum.
+
+    Keyword Arguments:
+        N
+            Number of angular momentum directions.
+    """
+    # Eric Andersson, 14-02-2018
+    from . import compute
+
+    return compute.sample_sphere((0, 1), N, dist = 'random')[0]
+
+

@@ -73,7 +73,7 @@ def GC_sample(datadir = './'):
     for i in range(N_GC):
         data.write("%4.5f\t%4.5f\t%4.5f\t%3.5f\t%3.5f\t%3.5f\n"
                 % (rp[i][0], rp[i][1], rp[i][2],
-                   vp[i][0], vp[i][1], vp[i][2]))
+                   vp[i][0]/K, vp[i][1]/K, vp[i][2]/K))
 
 def encounters(datadir = './'):
     """Generates a set of encounters for Galactic Potential Particle
@@ -199,3 +199,73 @@ def encounters(datadir = './'):
 
         myFile.close()
         count += 1
+
+def initial_conditions(nenc, datadir = './'):
+    """Generates a set of initial conditions with homogeneous
+    distribution in energy and pericentre distance.
+
+    Positional Arguments:
+        nenc
+            Number of encounters.
+
+    Keyword Arguments:
+        datadir
+            Directory to store data.
+    """
+    # Eric Andersson, 2018-01-15
+    from . import read
+    from . import compute
+    from . import constants
+    from . import draw
+    import numpy as np
+    import os
+
+    # Read set-up file.
+    (Rmin, Rmax, Emin, Emax) = read.setup(
+            param = ['Rmin', 'Rmax', 'Emin', 'Emax'], datadir = datadir)
+
+    # Loop over encounters.
+    for run in range(nenc):
+
+        # Draw pericentre distance and direction.
+        rmin = draw.pericentre(N = 1, lim = (Rmin, Rmax))[0]
+
+        # Draw energy of trajectory.
+        # Compute magnitude of velocity.
+        R = np.sqrt(rmin[0]**2 + rmin[1]**2)
+        z = rmin[2]
+        Phi = compute.M31_potential(R, z, model = 'Geehan')
+        Phi500 = compute.M31_potential(500, 0, model = 'Geehan')
+        E = Phi500 * draw.energy(N = 1, lim = (0, 1))[0]
+        print(E)
+        v = np.sqrt(2*E - 2*Phi)
+
+        # Draw direction of angular momentum.
+        J = draw.angular_momentum_direction(N = 1)[0]
+
+        # Compute direction of velocity and set magnitude.
+        v_vec = np.cross(J, rmin)
+        v = v * v_vec/np.linalg.norm(v_vec)
+
+        # Save to file.
+        # Set up direcory of encounter and write to file.
+        filename = './RUN{0:03d}/dwarf_IC.txt'.format(run)
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc:
+                if exc.errno != errno.EEXIST:
+                    raise
+        print(run)
+        print(np.linalg.norm(rmin))
+        print(np.linalg.norm(v))
+        print('')
+        # Overwrite existing data.
+        myFile = open(filename, 'w')
+        myFile.write("%4.5f\t%4.5f\t%4.5f\t%3.5f\t%3.5f\t%3.5f\n"
+                    % (rmin[0], rmin[1], rmin[2], v[0], v[1], v[2]))
+        myFile.close()
+        myFile = open('IC.txt', 'a')
+        myFile.write("%3.1f\t%0.5f\n" % (np.linalg.norm(rmin), E))
+        myFile.close()
+
