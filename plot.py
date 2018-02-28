@@ -116,7 +116,7 @@ def trajectories2D(plane, particles = '',
 
     plt.show()
 
-def separation(particles,
+def separation(particles, run,
         satellite = True, datadir = './data/', plotdir = '',
         dontshow = False, filename = 'separation'):
     """Plots the separation between the particles and M31 as function of
@@ -125,6 +125,8 @@ def separation(particles,
     Positional Arguments:
         particles
             List of all particle numbers.
+        run
+            Encounter number
 
     Keyword Arguments:
         satellite
@@ -147,7 +149,7 @@ def separation(particles,
 
 
     # Read in data
-    (_, x, y, z, vx, vy, vz, _, _) = read.particle(particles, datadir)
+    (_, x, y, z, vx, vy, vz, Ek, Ep) = read.particle(particles, datadir)
     (t, xs, ys, zs, _, _, _, _, _, _) = read.satellite(datadir)
     npar, nt = x.shape
 
@@ -163,8 +165,10 @@ def separation(particles,
         vp[par] = np.sqrt(vx[par]**2 + vy[par]**2 + vz[par]**2)
 
     # Count MGC1-like
-    (MGC1, _)= analyse.MGC1_like(particles, rs = rs, r = rp, v = vp,
-            datadir = datadir)
+    (MGC1, nMGC1, unb, ret) = analyse.MGC1_like(particles, run, rs = rs,
+            r = rp, v = vp, Ek = Ek, Ep = Ep, datadir = datadir)
+
+    print('Number of MGC1-like: {}'.format(nMGC1))
 
     # Compute final distance.
     rpf = np.zeros(npar)
@@ -204,18 +208,28 @@ def separation(particles,
             label = r'${\rm Dwarf\ galaxy }$')
 
     # Globular clusters
+
     for par in particles:
         if MGC1[par]:
             ax1.plot(t/1000, rp[par], 'g-', lw = 0.5, alpha = 1)
         else:
-            ax1.plot(t/1000, rp[par], '-',
-            color = 'grey', lw = 0.5, alpha = 1)
+            if unb[par]:
+                ax1.plot(t/1000, rp[par], '-y', lw = 0.5, alpha = 1)
+            elif ret[par]:
+                ax1.plot(t/1000, rp[par], '-b', lw = 0.5, alpha = 1)
+            else:
+                ax1.plot(t/1000, rp[par], '-', color = 'grey',
+                        lw = 0.5, alpha = 1)
 
     # Add labels
-    ax1.plot([],[], 'g-', lw = 0.5, alpha = 1,
+    ax1.plot([],[], 'g-', lw = 1, alpha = 1,
             label = r'${\rm MGC1-like}$')
-    ax1.plot([],[], '-', color = 'grey', lw = 0.5, alpha = 1,
-            label = r'${\rm Cluster}$')
+    ax1.plot([],[], '-', color = 'grey', lw = 1, alpha = 1,
+            label = r'${\rm Captured\ Cluster}$')
+    ax1.plot([],[], '-b', lw = 1, alpha = 1,
+            label = r'${\rm Retained\ Cluster}$')
+    ax1.plot([],[], '-y', lw = 1, alpha = 1,
+            label = r'${\rm Unbound\ Cluster}$')
 
     # MGC1 orbital distance.
     ax1.plot(t/1000, 200*np.ones(t.size), 'r--', lw = 3, zorder = 10,
@@ -224,7 +238,13 @@ def separation(particles,
     # Histogram
     bins = np.logspace(np.log10(1e0), np.log10(1e4), 50)
     ax2.hist(rpf, bins=bins, orientation = 'horizontal',
-            edgecolor = 'w', color = 'royalblue')
+            edgecolor = 'w', color = 'grey')
+    ax2.hist(rpf[MGC1], bins=bins, orientation = 'horizontal',
+            edgecolor = 'w', color = 'g')
+    ax2.hist(rpf[unb], bins=bins, orientation = 'horizontal',
+            edgecolor = 'w', color = 'y')
+    ax2.hist(rpf[ret], bins=bins, orientation = 'horizontal',
+            edgecolor = 'w', color = 'b')
 
     # Finilize figure
     xticks = ax1.xaxis.get_major_ticks()

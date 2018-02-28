@@ -8,10 +8,12 @@
 # Eric Andersson, 2018-01-11
 #=======================================================================
 
-def info(info, datadir = './../'):
-    """Reads in data about a simulated set of encounters.
+def info(run, info, datadir = './../'):
+    """Reads in data about a simulated encounters.
 
     Positional Arguments:
+        run
+            The encounter which is investigated. run = 5 -> RUN005
         info
             Information that is wanted.
 
@@ -20,7 +22,32 @@ def info(info, datadir = './../'):
             Directory of data.
     """
     # Eric Andersson, 2018-01-11
-    lines = sum(1 for line in open(datadir + 'info.txt'))
+    if not 'RUN {}'.format(run) in open(datadir + 'info.txt').read():
+        raise ValueError('RUN{0:03d}'.format(run) + ' does not exist')
+
+    # Find line where encounter info is stored.
+    read = False
+    n = 0
+    filename = datadir + 'info.txt'
+    substr = 'RUN {}'.format(run)
+    for line in open(filename):
+        for subline in line.strip().split('\n'):
+            if substr in line:
+                read = True
+            if read:
+                n+=1
+                for i in range(len(info)):
+                    words = line.split()
+                    if not len(words) == 0:
+                        if words[0] == info[i]:
+                            try:
+                                info[i] = float(words[2])
+                            except ValueError:
+                                info[i] = words[2]
+            if n < 27:
+                break
+
+    return tuple(info)
 
     for line in open(datadir + 'info.txt'):
         words = line.split()
@@ -105,7 +132,7 @@ def particle(particles,
     from . import constants
 
     # Constants
-    K = constants.conversion('kpc/Myr->km/s')
+    K = 1# constants.conversion('kpc/Myr->km/s')
 
     # Count number of particles and number of data points.
     npar = len(particles)
@@ -155,7 +182,7 @@ def satellite(datadir = './data/'):
     from . import constants
 
     # Constants
-    K = constants.conversion('kpc/Myr->km/s')
+    K = 1# constants.conversion('kpc/Myr->km/s')
 
     data = pd.read_csv(datadir + "satellite.txt",
             delimiter="\t",

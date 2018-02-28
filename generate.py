@@ -242,18 +242,21 @@ def initial_conditions(nenc, traj, datadir = './'):
             E = 0
         elif traj == 'Hyperbolic':
             E = draw.energy(N = 1, lim = (0, Emax))
-        v = np.sqrt(2*E - 2*Phi)
+        vb = np.sqrt(2*E - 2*Phi)
+        E = 0
+        vp = np.sqrt(2*E - 2*Phi)
 
         # Draw direction of angular momentum.
         J = draw.angular_momentum_direction(N = 1)[0]
 
         # Compute direction of velocity and set magnitude.
         v_vec = np.cross(J, rmin)
-        v = v * v_vec/np.linalg.norm(v_vec)
+        vb = vb * v_vec/np.linalg.norm(v_vec)
+        vp = vp * v_vec/np.linalg.norm(v_vec)
 
         # Save to file.
         # Set up direcory of encounter and write to file.
-        filename = './RUN{0:03d}/dwarf_IC.txt'.format(run)
+        filename = './RUN{0:03d}/dwarf_IC_bound.txt'.format(run)
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
@@ -264,9 +267,25 @@ def initial_conditions(nenc, traj, datadir = './'):
         # Overwrite existing data.
         myFile = open(filename, 'w')
         myFile.write("%4.5f\t%4.5f\t%4.5f\t%3.5f\t%3.5f\t%3.5f\n"
-                    % (rmin[0], rmin[1], rmin[2], v[0], v[1], v[2]))
+                    % (rmin[0], rmin[1], rmin[2], vb[0], vb[1], vb[2]))
         myFile.close()
         myFile = open('IC.txt', 'a')
         myFile.write("%3.1f\t%0.5f\n" % (np.linalg.norm(rmin), E))
         myFile.close()
 
+        filename = './RUN{0:03d}/dwarf_IC_parabolic.txt'.format(run)
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc:
+                if exc.errno != errno.EEXIST:
+                    raise
+
+        # Overwrite existing data.
+        myFile = open(filename, 'w')
+        myFile.write("%4.5f\t%4.5f\t%4.5f\t%3.5f\t%3.5f\t%3.5f\n"
+                    % (rmin[0], rmin[1], rmin[2], vp[0], vp[1], vp[2]))
+        myFile.close()
+        myFile = open('IC.txt', 'a')
+        myFile.write("%3.1f\t%0.5f\n" % (np.linalg.norm(rmin), E))
+        myFile.close()

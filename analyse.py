@@ -8,7 +8,8 @@
 # Eric Andersson, 2018-01-12
 #=======================================================================
 
-def retained(particles, r, rs, datadir = './../'):
+def retained(particles, r, rs, run, Ms = 'Ms', MM31 = 'MM31',
+        datadir = './../'):
     """Computes the number of cluster retained by the dwarf galaxy
     in the encounter.
 
@@ -20,8 +21,14 @@ def retained(particles, r, rs, datadir = './../'):
         rs
             Separation between dwarf galaxy and M31 at end of
             simulation.
+        run
+            Which encounter is investigated.
 
     Keyword Arguments:
+        Ms
+            Dwarf galaxy mass.
+        MM31
+            M31 mass.
         datadir
             Directory of data.
     """
@@ -32,11 +39,13 @@ def retained(particles, r, rs, datadir = './../'):
     from . import constants
 
     # Encounter parameters
-    (Ms,) = read.setup(param = ['M_s'], datadir = datadir)
-    M_M31 = constants.M31_mass()
+    if type(Ms) == str:
+        (Ms,) = read.info(run = run, info = ['M_s'], datadir = datadir)
+    if type(MM31) == str:
+        MM31 = constants.M31_mass()
 
     # Compute roche-lobe radius for dwarf.
-    rrl = compute.roche_lobe(rs, Ms, M_M31)
+    rrl = compute.roche_lobe(rs, Ms, MM31)
 
     # Check whether particles are within dwarf Roche-lobe
     n = 0
@@ -48,16 +57,17 @@ def retained(particles, r, rs, datadir = './../'):
 
     return (ret == 1), n
 
-def unbound(particles, r, v, ret = '', rs = '', datadir = './data'):
+def unbound(particles, Ek, Ep, rs = '', r = '', ret = '',
+        datadir = './data'):
     """Counts number of unbound clusters.
 
     Positional Arguments:
         particles
             List of all particles.
-        r
-            Separation between clusters and M31 at end of simulation.
-        v
-            Velocity of all clusters.
+        Ek
+            Kinetic energy of particles
+        Ep
+            Potential energy of particles
 
     Keyword Arguments:
         ret
@@ -73,37 +83,32 @@ def unbound(particles, r, v, ret = '', rs = '', datadir = './data'):
     npar = len(particles)
 
     # Count retained clusters unless provided.
-    if type(ret) == type(''):
+    if type(ret) == str:
         if rs == '':
             raise ValueError("Did not provide rs")
         (ret, _) = retained(particles, r, rs, datadir)
 
-    # Compute potential energy of particles.
-    M_M31 = constants.M31_mass()
-    Ep = compute.pointmass_potential(r, M_M31)
-
-    # Compute kinetic energy of particles.
-    Ek = 0.5 * v**2
-
     # Check whether bound or not.
     n = 0
     unbound = np.zeros(npar)
-    for par in range(npar):
-        if Ep[par] < Ek[par]:
+    for par in particles:
+        if Ep[par] + Ek[par] > 0:
             if not ret[par]:
                 unbound[par] = 1
                 n+=1
 
     return (unbound == 1), n
 
-def MGC1_like(particles,
-        rs = '', r = '', v = '', ret = '', unb = '',
+def MGC1_like(particles, run,
+        rs = '', r = '', v = '', ret = '', unb = '', Ek = '', Ep = '',
         datadir = './data/'):
     """Computes the fraction of MGC1-like clusters in an encounter.
 
     Positional Arguments:
         particles
             List of all particles.
+        run
+            Encounter number.
 
     Keyword Arguments:
         r
@@ -126,8 +131,9 @@ def MGC1_like(particles,
     npar = len(particles)
 
     # Load data unless provided
-    if type(r) == str or type(v) == str:
-        (_, x, y, z, vx, vy, vz, _, _) = read.particle(particles, datadir)
+    if type(r) == str or type(v) == str or type(Ek) == str or type(Ep) == str:
+        (_, x, y, z, vx, vy, vz, Ek, Ep) = read.particle(particles,
+                datadir)
         r = np.zeros(x.shape)
         v = np.zeros(x.shape)
         r[:] = np.sqrt(x[:]**2 + y[:]**2 + z[:]**2)
@@ -145,12 +151,12 @@ def MGC1_like(particles,
 
     # Retained clusters.
     if type(ret) == str:
-        ret, nret = retained(particles, rl, rs[-1],
+        ret, nret = retained(particles, rl, rs[-1], run,
                 datadir = datadir + './../../')
 
     # Unbound clusters.
     if type(unb) == str:
-        unb, nunb = unbound(particles, rl, vl, ret = ret,
+        unb, nunb = unbound(particles, Ek[:,-1], Ep[:,-1], ret = ret,
                 datadir = datadir + './../../')
 
     # Remove retained and unbound clusters.
@@ -177,4 +183,4 @@ def MGC1_like(particles,
                 if max(r[par][mask]) > 200:
                     MGC1[par] = True
                     n+=1
-    return MGC1, n
+    return MGC1, n, unb, ret
