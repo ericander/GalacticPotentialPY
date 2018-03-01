@@ -138,7 +138,6 @@ def particle(particles,
     npar = len(particles)
     ndat = sum(1 for line in open(
         datadir + 'particle_{}.txt'.format(particles[0])))
-
     # Initiate arrays for holding data.
     t = np.zeros([npar, ndat])
     x = np.zeros([npar, ndat])
@@ -156,6 +155,13 @@ def particle(particles,
                 delimiter="\t",
                 names = ["t", "x", "y", "z", "vx", "vy", "vz",
                     "Ek", "Ep"])
+        # Look for bugg in data.
+        try:
+            t[par] = data.t
+        except ValueError:
+            error = open(datadir + '../TERMINATED.out', 'w')
+            error.close()
+            continue
         t[par] = data.t
         x[par] = data.x
         y[par] = data.y
