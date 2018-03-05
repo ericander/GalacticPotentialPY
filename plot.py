@@ -165,8 +165,9 @@ def separation(particles, run,
         vp[par] = np.sqrt(vx[par]**2 + vy[par]**2 + vz[par]**2)
 
     # Count MGC1-like
-    (MGC1, nMGC1, unb, ret) = analyse.MGC1_like(particles, run, rs = rs,
-            r = rp, v = vp, Ek = Ek, Ep = Ep, datadir = datadir)
+    (MGC1, nMGC1, unb, ret) = analyse.MGC1_like(particles, run, t = t,
+            rs = rs, r = rp, v = vp, Ek = Ek, Ep = Ep,
+            datadir = datadir)
 
     print('Number of MGC1-like: {}'.format(nMGC1))
 
@@ -186,7 +187,7 @@ def separation(particles, run,
     ax1.minorticks_on()
     ax1.set_yscale('log')
     ax1.set_ylim(1e0, 1e4)
-    ax1.set_xlim(t[0]/1000, t[-1]/1000)
+    ax1.set_xlim(-2, 14)
     ax1.set_xlabel(
             r'${\rm Time,}\ t\ [{\rm Gyr}]$', fontsize = 16)
     ax1.set_ylabel(

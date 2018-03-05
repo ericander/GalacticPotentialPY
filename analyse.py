@@ -17,10 +17,10 @@ def retained(particles, r, rs, run, Ms = 'Ms', MM31 = 'MM31',
         particles
             List of all particles.
         r
-            Separation between clusters and M31 at end of simulation.
+            Separation between clusters and M31 at specific time.
         rs
-            Separation between dwarf galaxy and M31 at end of
-            simulation.
+            Separation between dwarf galaxy and M31 galaxy at specific
+            time.
         run
             Which encounter is investigated.
 
@@ -99,7 +99,7 @@ def unbound(particles, Ek, Ep, rs = '', r = '', ret = '',
 
     return (unbound == 1), n
 
-def MGC1_like(particles, run,
+def MGC1_like(particles, run, t = '',
         rs = '', r = '', v = '', ret = '', unb = '', Ek = '', Ep = '',
         datadir = './data/'):
     """Computes the fraction of MGC1-like clusters in an encounter.
@@ -138,20 +138,22 @@ def MGC1_like(particles, run,
         v = np.zeros(x.shape)
         r[:] = np.sqrt(x[:]**2 + y[:]**2 + z[:]**2)
         v[:] = np.sqrt(vx[:]**2 + vy[:]**2 + vz[:]**2)
-    if type(rs) == str:
-        (_, xs, ys, zs, vx, vy, vz, _, _, _) = read.satellite(datadir)
+    if type(rs) == str or type(t) == str:
+        (t, xs, ys, zs, vx, vy, vz, _, _, _) = read.satellite(datadir)
         rs = np.sqrt(xs**2 + ys**2 + zs**2)
 
-    # Index at closest approach
-    xpi = np.argmin(rs)
+    # Index where encounter occurs.
+    t0i = np.argwhere(t==min(t[(t>0)]))[0][0]
 
-    # Store only data at last step
-    rl = r[:,-1]
-    vl = v[:,-1]
+    # Filter out data before encounter.
+    postenc = list(range(t0i, r[0].size))
+
+    # Argument at maximum after encounter.
+    argmax = np.argwhere(rs == max(rs[postenc]))
 
     # Retained clusters.
     if type(ret) == str:
-        ret, nret = retained(particles, rl, rs[-1], run,
+        ret, nret = retained(particles, r[...,argmax], rs[argmax], run,
                 datadir = datadir + './../../')
 
     # Unbound clusters.
@@ -163,24 +165,24 @@ def MGC1_like(particles, run,
     M31GC = (ret == False) & (unb == False)
     bound_particles = np.array(particles)[M31GC]
 
-    # Find index at with dwarf crosses 300 kpc a second time.
-    postenc = list(range(xpi, r[0].size))
-    rsp = rs[postenc]
-    failed = False
-    try:
-        rsp = min(rsp[rsp > 300])
-        xai = np.where(rs == rsp)[0][0]
-    except ValueError:
-        failed = True
-
     # Find MGC1-like clusters
     MGC1 = np.zeros([npar], dtype=bool)
     n = 0
-    if not failed:
-        for par in bound_particles:
-            mask = list(range(xai, r[par].size))
-            if min(r[par][mask]) < 200:
-                if max(r[par][mask]) > 200:
-                    MGC1[par] = True
-                    n+=1
+
+    # Needed rounding function.
+    def myround(x, base = 100):
+        for i in range(x.size):
+            x[i] = int(base * round(float(x[i])/base))
+        return x
+
+    # Check which clusters pass 200 kpc at least 2 times.
+    for par in bound_particles:
+        rr = np.round(r[par][postenc], 0)
+        arg = np.argwhere(rr == 200)
+        # Ensure that we dont double-count due to unprecise rounding.
+        arg = list(set(myround(arg[...,0])))
+        if len(arg) > 1:
+            n+=1
+            MGC1[par] = True
+
     return MGC1, n, unb, ret
