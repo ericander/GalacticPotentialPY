@@ -185,4 +185,4 @@ def MGC1_like(particles, run, t = '',
             n+=1
             MGC1[par] = True
 
-    return MGC1, n, unb, ret
+    return MGC1, n, unb, nunb, ret, nret

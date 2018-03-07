@@ -165,7 +165,7 @@ def separation(particles, run,
         vp[par] = np.sqrt(vx[par]**2 + vy[par]**2 + vz[par]**2)
 
     # Count MGC1-like
-    (MGC1, nMGC1, unb, ret) = analyse.MGC1_like(particles, run, t = t,
+    (MGC1, nMGC1, unb, _, ret, _) = analyse.MGC1_like(particles, run, t = t,
             rs = rs, r = rp, v = vp, Ek = Ek, Ep = Ep,
             datadir = datadir)
 
