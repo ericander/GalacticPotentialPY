@@ -38,7 +38,7 @@ def GC_sample(rmin = 'None', rmax = 'None', datadir = './'):
     if type(rmin) == str or type(rmax) == str:
         rmin_GC = r_GC / compute.roche_lobe(1, M_GC, M_s)
         rmax_GC = compute.roche_lobe(r_fc, M_s, M_M31)
-    else
+    else:
         rmin_GC = rmin
         rmax_GC = rmax
 
