@@ -8,7 +8,7 @@
 # Eric Andersson, 2018-01-15
 #=======================================================================
 
-def GC_sample(datadir = './'):
+def GC_sample(rmin = 'None', rmax = 'None', datadir = './'):
     """Generates a list of globular cluster initial conditions randomly
     orbiting a dwarf galaxy.
 
@@ -35,8 +35,12 @@ def GC_sample(datadir = './'):
     N_GC = int(N_GC)
 
     # Globular cluster orbital distances.
-    rmin_GC = r_GC / compute.roche_lobe(1, M_GC, M_s)
-    rmax_GC = compute.roche_lobe(r_fc, M_s, M_M31)
+    if type(rmin) == str or type(rmax) == str:
+        rmin_GC = r_GC / compute.roche_lobe(1, M_GC, M_s)
+        rmax_GC = compute.roche_lobe(r_fc, M_s, M_M31)
+    else
+        rmin_GC = rmin
+        rmax_GC = rmax
 
     # Generate positions of the globular clusters.
     sphere, N_GC = compute.sample_sphere((rmin_GC, rmax_GC), N_GC,
