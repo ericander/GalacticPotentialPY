@@ -242,7 +242,7 @@ def initial_conditions(nenc, traj, ramax = 500, datadir = './'):
 
         # Compute maximum energy.
         if traj == 'Bound':
-            ra = np.random.uniform(r, ramax, 1)[0]
+            ra = np.random.uniform(np.linalg.norm(r), ramax, 1)[0]
             Phimax = compute.M31_potential(ra, 0, model = 'Geehan')
             E = Phimax * draw.energy(N = 1, lim = (0, 1))[0]
         elif traj == 'Parabolic':
