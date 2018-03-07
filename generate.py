@@ -274,7 +274,7 @@ def initial_conditions(nenc, traj, ramax = 500, datadir = './'):
         myFile.write("%4.5f\t%4.5f\t%4.5f\t%3.5f\t%3.5f\t%3.5f\n"
                     % (r[0], r[1], r[2], v[0], v[1], v[2]))
         myFile.close()
-        myFile = open(filename, 'a')
+        myFile = open('IC.txt', 'a')
         myFile.write("%3.1f\t%0.5f\n" % (np.linalg.norm(r), E))
         myFile.close()
 
