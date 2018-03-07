@@ -236,8 +236,8 @@ def initial_conditions(nenc, traj, ramax = 500, datadir = './'):
 
         # Draw energy of trajectory.
         # Compute magnitude of velocity.
-        R = np.sqrt(rmin[0]**2 + rmin[1]**2)
-        z = rmin[2]
+        R = np.sqrt(r[0]**2 + r[1]**2)
+        z = r[2]
         Phi = compute.M31_potential(R, z, model = 'Geehan')
 
         # Compute maximum energy.
@@ -256,7 +256,7 @@ def initial_conditions(nenc, traj, ramax = 500, datadir = './'):
         J = draw.angular_momentum_direction(N = 1)[0]
 
         # Compute direction of velocity and set magnitude.
-        v_vec = np.cross(J, rmin)
+        v_vec = np.cross(J, r)
         v = v * v_vec/np.linalg.norm(v_vec)
 
         # Save to file.
@@ -275,6 +275,6 @@ def initial_conditions(nenc, traj, ramax = 500, datadir = './'):
                     % (r[0], r[1], r[2], v[0], v[1], v[2]))
         myFile.close()
         myFile = open(filename, 'a')
-        myFile.write("%3.1f\t%0.5f\n" % (np.linalg.norm(rmin), E))
+        myFile.write("%3.1f\t%0.5f\n" % (np.linalg.norm(r), E))
         myFile.close()
 
