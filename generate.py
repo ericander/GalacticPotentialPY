@@ -204,7 +204,7 @@ def encounters(datadir = './'):
         myFile.close()
         count += 1
 
-def initial_conditions(nenc, traj, datadir = './'):
+def initial_conditions(nenc, traj, ramax = 500, datadir = './'):
     """Generates a set of initial conditions with homogeneous
     distribution in energy and pericentre distance.
 
@@ -225,38 +225,39 @@ def initial_conditions(nenc, traj, datadir = './'):
     import os
 
     # Read set-up file.
-    (Rmin, Rmax, Emax) = read.setup(
-            param = ['Rmin', 'Rmax', 'Emax'], datadir = datadir)
+    (Rmin, Rmax, Emin, Emax) = read.setup(
+            param = ['Rmin', 'Rmax', 'Emin', 'Emax'], datadir = datadir)
 
     # Loop over encounters.
     for run in range(nenc):
 
         # Draw pericentre distance and direction.
-        rmin = draw.pericentre(N = 1, lim = (Rmin, Rmax))[0]
+        r = draw.pericentre(N = 1, lim = (Rmin, Rmax))[0]
 
         # Draw energy of trajectory.
         # Compute magnitude of velocity.
         R = np.sqrt(rmin[0]**2 + rmin[1]**2)
         z = rmin[2]
         Phi = compute.M31_potential(R, z, model = 'Geehan')
-        Phi500 = compute.M31_potential(500, 0, model = 'Geehan')
+
+        # Compute maximum energy.
         if traj == 'Bound':
-            E = Phi500 * draw.energy(N = 1, lim = (0, 1))[0]
+            ra = np.random.uniform(r, ramax, 1)[0]
+            Phimax = compute.M31_potential(ra, 0, model = 'Geehan')
+            E = Phimax * draw.energy(N = 1, lim = (0, 1))[0]
         elif traj == 'Parabolic':
             E = 0
         elif traj == 'Hyperbolic':
             E = draw.energy(N = 1, lim = (0, Emax))
-        vb = np.sqrt(2*E - 2*Phi)
-        E = 0
-        vp = np.sqrt(2*E - 2*Phi)
+
+        v = np.sqrt(2*E - 2*Phi)
 
         # Draw direction of angular momentum.
         J = draw.angular_momentum_direction(N = 1)[0]
 
         # Compute direction of velocity and set magnitude.
         v_vec = np.cross(J, rmin)
-        vb = vb * v_vec/np.linalg.norm(v_vec)
-        vp = vp * v_vec/np.linalg.norm(v_vec)
+        v = v * v_vec/np.linalg.norm(v_vec)
 
         # Save to file.
         # Set up direcory of encounter and write to file.
@@ -271,25 +272,9 @@ def initial_conditions(nenc, traj, datadir = './'):
         # Overwrite existing data.
         myFile = open(filename, 'w')
         myFile.write("%4.5f\t%4.5f\t%4.5f\t%3.5f\t%3.5f\t%3.5f\n"
-                    % (rmin[0], rmin[1], rmin[2], vb[0], vb[1], vb[2]))
+                    % (r[0], r[1], r[2], v[0], v[1], v[2]))
         myFile.close()
-        myFile = open('IC.txt', 'a')
+        myFile = open(filename, 'a')
         myFile.write("%3.1f\t%0.5f\n" % (np.linalg.norm(rmin), E))
         myFile.close()
 
-        filename = './RUN{0:03d}/dwarf_IC_parabolic.txt'.format(run)
-        if not os.path.exists(os.path.dirname(filename)):
-            try:
-                os.makedirs(os.path.dirname(filename))
-            except OSError as exc:
-                if exc.errno != errno.EEXIST:
-                    raise
-
-        # Overwrite existing data.
-        myFile = open(filename, 'w')
-        myFile.write("%4.5f\t%4.5f\t%4.5f\t%3.5f\t%3.5f\t%3.5f\n"
-                    % (rmin[0], rmin[1], rmin[2], vp[0], vp[1], vp[2]))
-        myFile.close()
-        myFile = open('IC.txt', 'a')
-        myFile.write("%3.1f\t%0.5f\n" % (np.linalg.norm(rmin), E))
-        myFile.close()
