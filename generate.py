@@ -261,7 +261,7 @@ def initial_conditions(nenc, traj, ramax = 500, datadir = './'):
 
         # Save to file.
         # Set up direcory of encounter and write to file.
-        filename = './RUN{0:03d}/dwarf_IC_bound.txt'.format(run)
+        filename = './RUN{0:03d}/dwarf_IC.txt'.format(run)
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
