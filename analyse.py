@@ -149,7 +149,13 @@ def MGC1_like(particles, run, t = '',
     postenc = list(range(t0i, r[0].size))
 
     # Argument at maximum after encounter.
-    argmax = np.argwhere(rs == max(rs[postenc]))
+    try:
+        argmax = np.argwhere(rs == max(rs[postenc]))
+    except IndexError:
+        print('Error in data. Will flag run as terminated.')
+        term = open(datadir + '../TERMINATED.out', 'w')
+        term.close()
+        return 'failed', 0, 0, 0, 0, 0
 
     # Retained clusters.
     if type(ret) == str:
