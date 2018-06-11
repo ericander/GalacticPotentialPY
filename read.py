@@ -193,7 +193,7 @@ def satellite(datadir = './data/'):
     data = pd.read_csv(datadir + "satellite.txt",
             delimiter="\t",
             names = ["t", "x", "y", "z", "vx", "vy", "vz", "col",
-                "Ek", "Ep"])
+                "Ek", "Ep", "rt"])
 
     t = np.array(data.t)
     x =  np.array(data.x)
@@ -205,7 +205,9 @@ def satellite(datadir = './data/'):
     col = np.array(data.col)
     Ek = np.array(data.Ek)
     Ep = np.array(data.Ep)
-    return (t, x, y, z, vx, vy, vz, col, Ek, Ep)
+    rt = np.array(data.rt)
+
+    return (t, x, y, z, vx, vy, vz, col, Ek, Ep, rt)
 
 def GC_sample(datadir = './'):
     """Reads the generated sample of clusters.

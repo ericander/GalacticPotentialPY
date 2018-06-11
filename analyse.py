@@ -192,3 +192,210 @@ def MGC1_like(particles, run, t = '',
             MGC1[par] = True
 
     return MGC1, n, unb, nunb, ret, nret
+
+def findRUN(filename, rp = '', Etot = '', fret = '', fstr = '', funb = '',
+        fcap = '', fMGC1 = '', term = '', strip = '', col = '',
+        return_as_list = False):
+    """ Function that finds an encounter number given a value of a specific
+    parameter. Function works in two ways:
+     (1) If parameter is given as tuple the function returns all runs within
+         the specified range.
+     (2) If parameter is given as a single value it find the encounter that
+         has the closest to this value.
+    If given multiple paramter the function tries to find the most suitable
+    candidate.
+
+    Positional Arguments:
+        filename
+            Name and path to output file in which function searches.
+
+    Keyword Arguments:
+        rp
+            Pericentre distance
+        Etot
+            Total specific orbital energy
+        fret
+            Fraction of retained clusters.
+        fstr
+            Fraction of stripped clusters.
+        funb
+            Fraction of unbound clusters.
+        fcap
+            Fraction of captured clusters.
+        fMGC1
+            Fraction of MGC1-like clusters.
+        term
+            Terminated run
+        strip
+            Runs in which dwarf was stripped.
+        col
+            Runs in which dwarf collided with M31.
+        return_as_list
+            Returns runs in list
+    """
+    # Eric Andersson, 23-03-18.
+    import numpy as np
+    import pandas as pd
+    K = 1/(0.001022**2)
+
+    # Read in data.
+    gc = pd.read_csv(filename,
+            delimiter="\t", skiprows = 27,
+            names = ["run", "rp", "ra", "e", "a", "v_inc", "Etot",
+            "ntot", "nret", "fret", "nstr", "fstr", "nunb", "funb",
+            "ncap", "fcap", "nMGC1", "fMGC1", "strip", "col",
+            "rp_IC", "v_IC", "term"])
+    run = np.array(gc.run)
+    rpin = np.array(gc.rp)
+    Etotin = np.array(gc.Etot)*K
+    fretin = np.array(gc.fret)
+    fstrin = np.array(gc.fstr)
+    funbin = np.array(gc.funb)
+    fcapin = np.array(gc.fcap)
+    fMGC1in = np.array(gc.fMGC1)
+    stripin = np.array(gc.strip)
+    colin = np.array(gc.col)
+    termin = np.array(gc.term)
+
+    # Function for finding nearest.
+    def find_nearest(array, value):
+        idx = (np.abs(array-value)).argmin()
+        return idx
+
+    # Set up masks if given ranges.
+    mask = np.ones(rpin.size, dtype = bool)
+    runs = []
+
+    # Pericentre
+    if not type(rp) == str:
+        if type(rp) == tuple:
+            mask = mask & (rp[0] < rpin) & (rp[1] > rpin)
+
+    # Total specific energy.
+    if not type(Etot) == str:
+        if type(Etot) == tuple:
+            mask = mask & (Etot[0] < Etotin) & (Etot[1] > Etotin)
+
+    # Fraction of retained clusters.
+    if not type(fret) == str:
+        if type(fret) == tuple:
+            mask = mask & (fret[0] < fretin) & (fret[1] > fretin)
+
+    # Fraction of stripped clusters.
+    if not type(fstr) == str:
+        if type(fstr) == tuple:
+            mask = mask & (fstr[0] < fstrin) & (fstr[1] > fstrin)
+
+    # Fraction of unbound clusters.
+    if not type(funb) == str:
+        if type(funb) == tuple:
+            mask = mask & (funb[0] < funbin) & (funb[1] > funbin)
+
+    # Fraction of unbound clusters.
+    if not type(fcap) == str:
+        if type(fcap) == tuple:
+            mask = mask & (fcap[0] < fcapin) & (fcap[1] > fcapin)
+
+    # Fraction of MGC1-like clusters.
+    if not type(fMGC1) == str:
+        if type(fMGC1) == tuple:
+            mask = mask & (fMGC1[0] < fMGC1in) & (fMGC1[1] > fMGC1in)
+
+    # Stipped runs.
+    if not type(strip) == str:
+        mask = mask & (stripin == 1)
+
+    # Collision runs.
+    if not type(col) == str:
+        mask = mask & (colin == 1)
+
+    # Terminated runs.
+    if not type(term) == str:
+        mask = mask & (termin == 1)
+
+    # Find specific encounters.
+    if type(rp) == int:
+        rp = float(rp)
+    if type(Etot) == int:
+        Etot = float(Etot)
+    if type(fret) == int:
+        fret = float(fret)
+    if type(fstr) == int:
+        fstr = float(fstr)
+    if type(funb) == int:
+        funb = float(funb)
+    if type(fcap) == int:
+        fcap = float(fcap)
+    if type(fMGC1) == int:
+        fMGC1 = float(fMGC1)
+
+    # Pericentre
+    if not type(rp) == str:
+        if type(rp) == float:
+            runs.append(find_nearest(rpin[mask], rp))
+
+    # Total specific energy.
+    if not type(Etot) == str:
+        if type(Etot) == float:
+            runs.append(find_nearest(Etotin[mask], Etot))
+
+    # Fraction of retained clusters.
+    if not type(fret) == str:
+        if type(fret) == float:
+            runs.append(find_nearest(fretin[mask], fret))
+
+    # Fraction of stripped clusters.
+    if not type(fstr) == str:
+        if type(fstr) == float:
+           runs.append(find_nearest(fstrin[mask], fstr))
+
+    # Fraction of unbound clusters.
+    if not type(funb) == str:
+        if type(funb) == float:
+           runs.append(find_nearest(funbin[mask], funb))
+
+    # Fraction of unbound clusters.
+    if not type(fcap) == str:
+        if type(fcap) == float:
+           runs.append(find_nearest(fcapin[mask], fcap))
+
+    # Fraction of MGC1-like clusters.
+    if not type(fMGC1) == str:
+        if type(fMGC1) == float:
+           runs.append(find_nearest(fMGC1in[mask], fMGC1))
+
+    # Print resutls.
+    print('Encounters within given ranges')
+    if all(mask):
+        print('No ranges was given or all encounters are contained within'\
+                'given range!')
+    else:
+        masked_runs = run[mask]
+        for r in masked_runs:
+            print('RUN{0:03d}'.format(int(r)))
+
+    print('\n\n Specific runs')
+    if len(runs) == 0:
+        print('No specific runs requested.')
+    else:
+        for r in runs:
+            print('RUN{0:03d}'.format(int(run[r])))
+
+    # Return
+    if not return_as_list:
+        return
+    else:
+        return runs, mask
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -109,9 +109,8 @@ def roche_lobe(A, m1, m2):
     import numpy as np
 
     q = m1/m2
-    r = A * (0.49*q**(2/3) / (0.6*q**(2/3) + np.log(1 + q**(1/3))))
-
-    return r
+    f = (0.49*q**(2/3) / (0.6*q**(2/3) + np.log(1 + q**(1/3))))
+    return A*f
 
 def pointmass_potential(r, M):
     """ Computes the potential of a pointmass at distance r.
@@ -150,7 +149,7 @@ def perpendicular_vector(v):
             return np.cross(v, [0, 1, 0])
     return np.cross(v, [1, 0, 0])
 
-def sample_sphere(rlim, N, dist = 'random'):
+def sample_sphere(rlim, N, dist = 'random', rdist = 'rsquared'):
     """ Function that generates N points inside a spherical shell with
     radius limited by rlim.
 
@@ -191,8 +190,12 @@ def sample_sphere(rlim, N, dist = 'random'):
         vec = np.random.randn(N, 3)
         for i in range(N):
             vec[i] /= np.linalg.norm(vec[i])
-            vec[i] *= np.sqrt(
+            if rdist == 'rsquard':
+                vec[i] *= np.sqrt(
                     np.random.uniform(rlim[0]**2, rlim[1]**2, 1))
+            elif rdist == 'r':
+                vec[i] *= np.random.uniform(rlim[0], rlim[1], 1)
+
         return vec, int(N)
     else:
         raise ValueError(dist + " does not exist.")

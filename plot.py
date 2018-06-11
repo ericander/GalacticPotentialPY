@@ -165,11 +165,10 @@ def separation(particles, run,
         vp[par] = np.sqrt(vx[par]**2 + vy[par]**2 + vz[par]**2)
 
     # Count MGC1-like
-    (MGC1, nMGC1, unb, _, ret, _) = analyse.MGC1_like(particles, run, t = t,
+    (MGC1, nMGC1, unb, nunb, ret, nret) = analyse.MGC1_like(particles, run, t = t,
             rs = rs, r = rp, v = vp, Ek = Ek, Ep = Ep,
             datadir = datadir)
 
-    print('Number of MGC1-like: {}'.format(nMGC1))
 
     # Compute final distance.
     rpf = np.zeros(npar)
@@ -182,21 +181,23 @@ def separation(particles, run,
     right_plot_size = [0.75, 0.1, 0.2, 0.85]
     ax1 = plt.axes(left_plot_size)
     ax2 = plt.axes(right_plot_size)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
 
     # Left plot
     ax1.minorticks_on()
     ax1.set_yscale('log')
-    ax1.set_ylim(1e0, 1e4)
-    ax1.set_xlim(-2, 14)
+    ax1.set_ylim(1e1, 1e4)
+    ax1.set_xlim(-2, 12)
     ax1.set_xlabel(
-            r'${\rm Time,}\ t\ [{\rm Gyr}]$', fontsize = 16)
+            r'${\rm Time}\quad ({\rm Gyr})$', fontsize = 16)
     ax1.set_ylabel(
-            r'${\rm Distance\ from\ M31,}\ r\ {\rm [kpc]}$',
+            r'${\rm Distance\ from\ M31}\quad ({\rm kpc})$',
             fontsize = 16)
 
     # Right plot
     ax2.minorticks_on()
-    ax2.set_ylim(1e0, 1e4)
+    ax2.set_ylim(1e1, 1e4)
     ax2.set_xlim(6e-1, 1e3)
     ax2.set_xscale('log')
     ax2.set_yscale('log')
@@ -204,11 +205,14 @@ def separation(particles, run,
     ax2.set_xlabel(r'${\rm Number\ of\ Clusters}$', fontsize = 16)
 
     # Plot data
-    # Dwarf galaxy
-    ax1.plot(t/1000, rs, 'k--', lw = 3, zorder = 10,
-            label = r'${\rm Dwarf\ galaxy }$')
 
     # Globular clusters
+    ncap = len(particles) - (nunb + nret)
+    print('Total: {}'.format(len(particles)))
+    print('Captured: {}'.format(ncap))
+    print('Retained: {}'.format(nret))
+    print('Unbound: {}'.format(nunb))
+    print('MGC1-like: {}'.format(nMGC1))
 
     for par in particles:
         if MGC1[par]:
@@ -223,21 +227,24 @@ def separation(particles, run,
                         lw = 0.5, alpha = 1)
 
     # Add labels
+    ax1.plot([],[], '-', color = 'grey', lw = 1, alpha = 1,
+            label = r'${\rm Captured}$')
+    ax1.plot([],[], '-b', lw = 1, alpha = 1,
+            label = r'${\rm Retained}$')
+    ax1.plot([],[], '-y', lw = 1, alpha = 1,
+            label = r'${\rm Unbound}$')
     ax1.plot([],[], 'g-', lw = 1, alpha = 1,
             label = r'${\rm MGC1-like}$')
-    ax1.plot([],[], '-', color = 'grey', lw = 1, alpha = 1,
-            label = r'${\rm Captured\ Cluster}$')
-    ax1.plot([],[], '-b', lw = 1, alpha = 1,
-            label = r'${\rm Retained\ Cluster}$')
-    ax1.plot([],[], '-y', lw = 1, alpha = 1,
-            label = r'${\rm Unbound\ Cluster}$')
+
+    # Dwarf galaxy
+    ax1.plot(t/1000, rs, 'r--', lw = 3, zorder = 10,
+            label = r'${\rm Dwarf\ galaxy }$')
 
     # MGC1 orbital distance.
-    ax1.plot(t/1000, 200*np.ones(t.size), 'r--', lw = 3, zorder = 10,
-            label = r'${\rm MGC1}$')
+    ax1.plot(t/1000, 200*np.ones(t.size), 'k--', lw = 3, zorder = 10)
 
     # Histogram
-    bins = np.logspace(np.log10(1e0), np.log10(1e4), 50)
+    bins = np.logspace(np.log10(1e0), np.log10(1e4), 80)
     ax2.hist(rpf, bins=bins, orientation = 'horizontal',
             edgecolor = 'w', color = 'grey')
     ax2.hist(rpf[MGC1], bins=bins, orientation = 'horizontal',
@@ -250,7 +257,7 @@ def separation(particles, run,
     # Finilize figure
     xticks = ax1.xaxis.get_major_ticks()
     xticks[-1].label1.set_visible(False)
-    ax1.legend(loc='upper left')
+    ax1.legend(loc='upper left', frameon = False)
     if not plotdir == '':
         plt.savefig(plotdir + filename + '.pdf')
     if not dontshow:

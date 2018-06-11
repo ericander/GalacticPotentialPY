@@ -104,7 +104,7 @@ def incoming_velocity(trajectory, r, v_max = 29979.2):
         raise ValueError(
                 trajectory + ' is not a valid trajectory')
 
-def pericentre(N, lim):
+def pericentre(N, lim, rdist = 'rsquared'):
     """Generates a pericentre position for a dwarf galaxy.
 
     Positional Arguments:
@@ -117,7 +117,8 @@ def pericentre(N, lim):
     # Eric Andersson, 2018-02-14.
     from . import compute
 
-    return compute.sample_sphere(lim, N, dist = 'random')[0]
+    return compute.sample_sphere(lim, N, dist = 'random',
+            rdist = rdist)[0]
 
 def energy(N, lim):
     """Draws a random total energy in the range given by lim.
