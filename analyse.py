@@ -139,7 +139,7 @@ def MGC1_like(particles, run, t = '',
         r[:] = np.sqrt(x[:]**2 + y[:]**2 + z[:]**2)
         v[:] = np.sqrt(vx[:]**2 + vy[:]**2 + vz[:]**2)
     if type(rs) == str or type(t) == str:
-        (t, xs, ys, zs, vx, vy, vz, _, _, _) = read.satellite(datadir)
+        (t, xs, ys, zs, vx, vy, vz, _, _, _,_) = read.satellite(datadir)
         rs = np.sqrt(xs**2 + ys**2 + zs**2)
 
     # Index where encounter occurs.
@@ -159,7 +159,7 @@ def MGC1_like(particles, run, t = '',
 
     # Retained clusters.
     if type(ret) == str:
-        ret, nret = retained(particles, r[...,argmax], rs[argmax], run,
+        ret, nret = retained(particles, r[...,-1], rs[-1], run,
                 datadir = datadir + './../../')
 
     # Unbound clusters.
